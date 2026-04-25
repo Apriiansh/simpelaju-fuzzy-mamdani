@@ -27,6 +27,7 @@ Route::middleware('auth')->group(function () {
     Route::resource('penilaian', PenilaianController::class);
     Route::post('penilaian/hitung-massal', [PenilaianController::class, 'hitungMassal'])->name('penilaian.hitung-massal');
     Route::get('kriteria-fuzzy', [\App\Http\Controllers\KriteriaFuzzyController::class, 'index'])->name('kriteria-fuzzy.index');
+    Route::get('web-gis', [\App\Http\Controllers\WebGisController::class, 'index'])->name('web-gis.index');
 });
 
 require __DIR__.'/auth.php';

@@ -311,6 +311,14 @@
                 Setiap rule dievaluasi dengan operator <strong>AND (MIN)</strong>. Hasil seluruh rule per output digabungkan dengan fungsi <strong>MAX (Komposisi Mamdani)</strong>.
                 Defuzzifikasi menggunakan metode <strong>Centroid COA</strong> dengan diskritisasi Z = 0 hingga 100.
                 Threshold keputusan: <strong>Z* ≥ 50 → LAYAK, Z* &lt; 50 → TIDAK LAYAK</strong>.
+                
+                <div class="mt-3 p-3 rounded-lg bg-amber-50 border border-amber-200 text-amber-800 flex items-start gap-2 shadow-sm">
+                    <svg class="w-4 h-4 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                    <div>
+                        <strong class="font-bold uppercase tracking-widest text-[9px] block mb-0.5">Penjelasan Skor 0.000 (Kasus Unik)</strong>
+                        Jika terdapat hasil evaluasi dengan skor Defuzzifikasi tepat <strong>0.000</strong>, hal ini menandakan bahwa kombinasi himpunan fuzzy untuk warga tersebut <strong>tidak terdaftar di dalam 37 aturan di atas</strong>. Tanpa aturan yang cocok (Alpha = 0 untuk semua rule), fungsi centroid bernilai nol dan otomatis dikategorikan sebagai TIDAK LAYAK. Idealnya, sistem dengan 4 kriteria (masing-masing 3 himpunan) membutuhkan 81 rules (3x3x3x3) agar seluruh kemungkinan ter-<em>cover</em>.
+                    </div>
+                </div>
             </div>
         </div>
 

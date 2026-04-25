@@ -53,7 +53,7 @@
             <span class="text-[10px] font-bold text-premium-amber-light/60 uppercase tracking-[0.2em]">GIS & Reports</span>
         </div>
 
-        <x-nav-link-custom href="#" icon="map-pin">
+        <x-nav-link-custom href="{{ route('web-gis.index') }}" :active="request()->routeIs('web-gis.*')" icon="map-pin">
             Web GIS
         </x-nav-link-custom>
 
