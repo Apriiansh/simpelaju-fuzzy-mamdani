@@ -25,6 +25,8 @@ Route::middleware('auth')->group(function () {
     Route::resource('rumah', RumahController::class);
     Route::post('rumah/{rumah}/recalculate', [RumahController::class, 'recalculate'])->name('rumah.recalculate');
     Route::resource('penilaian', PenilaianController::class);
+    Route::post('penilaian/hitung-massal', [PenilaianController::class, 'hitungMassal'])->name('penilaian.hitung-massal');
+    Route::get('kriteria-fuzzy', [\App\Http\Controllers\KriteriaFuzzyController::class, 'index'])->name('kriteria-fuzzy.index');
 });
 
 require __DIR__.'/auth.php';

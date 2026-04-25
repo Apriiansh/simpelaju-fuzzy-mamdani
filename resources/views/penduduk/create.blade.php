@@ -107,29 +107,100 @@
                     </div>
                     <h3 class="text-lg font-serif font-bold text-forest">Lokasi (Geospasial)</h3>
                 </div>
-                <p class="text-xs text-forest/50 mb-6 bg-paper/50 p-3 rounded-lg border border-premium-border/20 italic">Koordinat digunakan untuk memetakan lokasi penduduk. Fitur map picker akan tersedia di Phase 6.</p>
+                
+                <!-- Leaflet Map Container -->
+                <div class="mb-6">
+                    <div id="map" class="h-64 rounded-xl border border-premium-border/30 shadow-inner z-10"></div>
+                    <p class="mt-2 text-[10px] text-forest/50 italic tracking-wider">Klik pada peta untuk menentukan lokasi rumah secara presisi.</p>
+                </div>
                 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div>
                         <x-input-label for="latitude" :value="__('Latitude')" />
-                        <x-text-input id="latitude" name="latitude" type="text" class="mt-1 block w-full" :value="old('latitude')" placeholder="-2.99xxx" />
+                        <x-text-input id="latitude" name="latitude" type="text" class="mt-1 block w-full bg-paper/30" :value="old('latitude')" placeholder="-2.99xxx" required />
                         <x-input-error class="mt-2" :messages="$errors->get('latitude')" />
                     </div>
 
                     <div>
                         <x-input-label for="longitude" :value="__('Longitude')" />
-                        <x-text-input id="longitude" name="longitude" type="text" class="mt-1 block w-full" :value="old('longitude')" placeholder="104.77xxx" />
+                        <x-text-input id="longitude" name="longitude" type="text" class="mt-1 block w-full bg-paper/30" :value="old('longitude')" placeholder="104.77xxx" required />
                         <x-input-error class="mt-2" :messages="$errors->get('longitude')" />
                     </div>
                 </div>
             </div>
 
             <div class="flex items-center justify-end space-x-6">
-                <a href="{{ route('penduduk.index') }}" class="text-xs font-bold uppercase tracking-widest text-forest/40 hover:text-forest transition-colors">Batal</a>
-                <x-primary-button>
+                <a href="{{ route('penduduk.index') }}" class="text-forest/60 hover:text-forest font-bold text-sm tracking-widest transition-colors uppercase">Batal</a>
+                <x-primary-button class="px-8 py-3 rounded-xl bg-forest hover:bg-forest-light text-paper shadow-lg shadow-forest/20">
                     {{ __('Simpan Data Penduduk') }}
                 </x-primary-button>
             </div>
         </form>
     </div>
+
+    @push('styles')
+    <style>
+        #map { background: #f8f9fa; z-index: 1; }
+    </style>
+    @endpush
+
+    @push('scripts')
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(function() {
+                if (typeof L === 'undefined') return;
+
+                const latInput = document.getElementById('latitude');
+                const lngInput = document.getElementById('longitude');
+
+                const defaultLat = -2.994987;
+                const defaultLng = 104.808954;
+                
+                const map = L.map('map').setView([defaultLat, defaultLng], 14);
+
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                }).addTo(map);
+
+                let marker;
+
+                function updateMarker(lat, lng) {
+                    if (marker) {
+                        marker.setLatLng([lat, lng]);
+                    } else {
+                        marker = L.marker([lat, lng], { draggable: true }).addTo(map);
+                        marker.on('dragend', function(event) {
+                            const position = marker.getLatLng();
+                            latInput.value = position.lat.toFixed(8);
+                            lngInput.value = position.lng.toFixed(8);
+                        });
+                    }
+                    map.panTo([lat, lng]);
+                }
+
+                map.on('click', function(e) {
+                    const { lat, lng } = e.latlng;
+                    updateMarker(lat, lng);
+                    latInput.value = lat.toFixed(8);
+                    lngInput.value = lng.toFixed(8);
+                });
+
+                [latInput, lngInput].forEach(input => {
+                    input.addEventListener('change', function() {
+                        const lat = parseFloat(latInput.value);
+                        const lng = parseFloat(lngInput.value);
+                        if (!isNaN(lat) && !isNaN(lng)) {
+                            updateMarker(lat, lng);
+                        }
+                    });
+                });
+
+                // Fix for scattered tiles
+                setTimeout(function() {
+                    map.invalidateSize();
+                }, 200);
+            }, 400);
+        });
+    </script>
+    @endpush
 </x-app-layout>

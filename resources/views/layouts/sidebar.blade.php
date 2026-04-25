@@ -41,11 +41,11 @@
             <span class="text-[10px] font-bold text-premium-amber-light/60 uppercase tracking-[0.2em]">SPK Process</span>
         </div>
 
-        <x-nav-link-custom href="#" icon="clipboard-list">
+        <x-nav-link-custom href="{{ route('kriteria-fuzzy.index') }}" :active="request()->routeIs('kriteria-fuzzy.*')" icon="clipboard-list">
             Kriteria & Fuzzy
         </x-nav-link-custom>
 
-        <x-nav-link-custom href="{{ route('penilaian.index') }}" :active="request()->routeIs('penilaian.*')" icon="calculator">
+        <x-nav-link-custom href="{{ route('penilaian.index') }}" :active="request()->routeIs('penilaian.*')" icon="clipboard-list">
             Penilaian & Hasil
         </x-nav-link-custom>
 

@@ -11,14 +11,6 @@
                     <span class="text-forest/80">{{ $penduduk->nama_lengkap }}</span>
                 </div>
             </div>
-            <div class="flex items-center space-x-3">
-                <a href="{{ route('penduduk.index') }}" class="text-forest/60 hover:text-forest bg-white/50 border border-premium-border/50 px-5 py-2.5 rounded-xl transition-all duration-300 font-bold text-xs uppercase tracking-widest shadow-sm hover:shadow-md">
-                    Kembali
-                </a>
-                <a href="{{ route('penduduk.edit', $penduduk) }}" class="bg-forest text-cream px-5 py-2.5 rounded-xl shadow-lg shadow-forest/10 text-xs font-bold uppercase tracking-widest hover:bg-forest-dark transition-all duration-300 hover:-translate-y-0.5">
-                    Edit Profil
-                </a>
-            </div>
         </div>
     </x-slot>
 
@@ -26,13 +18,25 @@
         <!-- Main Info -->
         <div class="lg:col-span-2 space-y-8">
             <div class="bg-white/70 backdrop-blur-sm p-8 rounded-2xl shadow-sm border border-premium-border/50">
-                <div class="flex items-center mb-8 border-b border-premium-border/30 pb-4">
-                    <div class="w-10 h-10 rounded-xl bg-forest/10 flex items-center justify-center text-forest mr-4 border border-forest/10">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                <div class="flex items-center justify-between mb-8 border-b border-premium-border/30 pb-4">
+                    <div class="flex items-center">
+                        <div class="w-10 h-10 rounded-xl bg-forest/10 flex items-center justify-center text-forest mr-4 border border-forest/10">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-serif font-bold text-forest leading-tight">Profil Lengkap</h3>
+                            <p class="text-xs text-forest/40 font-bold tracking-widest uppercase">General Information</p>
+                        </div>
                     </div>
-                    <div>
-                        <h3 class="text-lg font-serif font-bold text-forest leading-tight">Profil Lengkap</h3>
-                        <p class="text-xs text-forest/40 font-bold tracking-widest uppercase">General Information</p>
+
+                    <div class="flex items-center space-x-3">
+                        <a href="{{ route('penduduk.index') }}" class="text-forest/60 hover:text-forest bg-white/50 border border-premium-border/50 px-4 py-2 rounded-xl transition-all duration-300 font-bold text-[10px] uppercase tracking-widest shadow-sm hover:shadow-md">
+                            Kembali
+                        </a>
+                        <a href="{{ route('penduduk.edit', $penduduk) }}" class="bg-forest text-cream px-4 py-2 rounded-xl shadow-lg shadow-forest/10 text-[10px] font-bold uppercase tracking-widest hover:bg-forest-dark transition-all duration-300 hover:-translate-y-0.5 flex items-center">
+                            <svg class="w-3 h-3 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+                            Edit Profil
+                        </a>
                     </div>
                 </div>
                 
@@ -230,8 +234,70 @@
                     </div>
                 @endif
             </div>
+
+            <!-- Geospatial Map Card -->
+            @if($penduduk->latitude && $penduduk->longitude)
+            <div class="bg-white/70 backdrop-blur-sm p-4 rounded-2xl shadow-sm border border-premium-border/50">
+                <div class="flex items-center mb-4 px-2">
+                    <div class="w-8 h-8 rounded-lg bg-forest/10 flex items-center justify-center text-forest mr-3">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                    </div>
+                    <h3 class="text-sm font-serif font-bold text-forest">Lokasi Geospasial</h3>
+                </div>
+                
+                <div id="map-detail" class="h-48 rounded-xl border border-premium-border/30 z-10"></div>
+                
+                <div class="mt-4 px-2 flex justify-between items-center text-[10px] font-mono text-forest/40">
+                    <span>LAT: {{ $penduduk->latitude }}</span>
+                    <span>LNG: {{ $penduduk->longitude }}</span>
+                </div>
+            </div>
+            @endif
         </div>
     </div>
+
+    @if($penduduk->latitude && $penduduk->longitude)
+    @push('styles')
+    <style>
+        #map-detail { 
+            height: 250px !important; 
+            width: 100%; 
+            border-radius: 12px;
+            z-index: 1;
+        }
+    </style>
+    @endpush
+
+    @push('scripts')
+    <script>
+        setTimeout(function() {
+            if (typeof L === 'undefined') {
+                console.error('Leaflet (L) is not defined. Check your Vite build.');
+                return;
+            }
+
+            const lat = {{ $penduduk->latitude }};
+            const lng = {{ $penduduk->longitude }};
+            
+            const map = L.map('map-detail', {
+                zoomControl: true,
+                attributionControl: false
+            }).setView([lat, lng], 16);
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+            L.marker([lat, lng]).addTo(map)
+                .bindPopup("<b>{{ $penduduk->nama_lengkap }}</b>")
+                .openPopup();
+
+            // Fix for "scattered tiles" or gray squares
+            setTimeout(function() {
+                map.invalidateSize();
+            }, 100);
+        }, 400); // Increased delay for stability
+    </script>
+    @endpush
+    @endif
 </x-app-layout>
 
 

@@ -22,12 +22,35 @@ class PenilaianController extends Controller
     }
 
     /**
-     * Display a listing of the resource.
+     * Display a listing of all assessments with full detail columns.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $penilaian = Penilaian::with(['penduduk', 'hasilSPK', 'user'])->latest()->paginate(10);
-        return view('penilaian.index', compact('penilaian'));
+        // Load all penilaian with full relations for the detail table
+        $penilaian = Penilaian::with([
+                'penduduk.kelurahan',
+                'penduduk.rumah',
+                'nilaiKriteria.kriteria',
+                'hasilSPK',
+            ])
+            ->latest()
+            ->paginate(20);
+
+        // Compute average crisp score per kelurahan for stats cards
+        $statsPerKelurahan = \App\Models\HasilSpk::join('penilaian', 'hasil_spk.penilaian_id', '=', 'penilaian.id')
+            ->join('penduduk', 'penilaian.penduduk_id', '=', 'penduduk.id')
+            ->join('kelurahan', 'penduduk.kelurahan_id', '=', 'kelurahan.id')
+            ->select(
+                'kelurahan.nama as kelurahan_nama',
+                \Illuminate\Support\Facades\DB::raw('AVG(hasil_spk.nilai_defuzzifikasi) as rata_skor'),
+                \Illuminate\Support\Facades\DB::raw('COUNT(*) as total'),
+                \Illuminate\Support\Facades\DB::raw('SUM(CASE WHEN hasil_spk.kategori_kelayakan = \'LAYAK\' THEN 1 ELSE 0 END) as total_layak')
+            )
+            ->groupBy('kelurahan.id', 'kelurahan.nama')
+            ->orderByDesc('rata_skor')
+            ->get();
+
+        return view('penilaian.index', compact('penilaian', 'statsPerKelurahan'));
     }
 
     /**
