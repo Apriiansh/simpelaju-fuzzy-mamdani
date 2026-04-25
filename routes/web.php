@@ -28,6 +28,8 @@ Route::middleware('auth')->group(function () {
     Route::post('penilaian/hitung-massal', [PenilaianController::class, 'hitungMassal'])->name('penilaian.hitung-massal');
     Route::get('kriteria-fuzzy', [\App\Http\Controllers\KriteriaFuzzyController::class, 'index'])->name('kriteria-fuzzy.index');
     Route::get('web-gis', [\App\Http\Controllers\WebGisController::class, 'index'])->name('web-gis.index');
+    Route::get('laporan', [\App\Http\Controllers\LaporanController::class, 'index'])->name('laporan.index');
+    Route::get('laporan/cetak', [\App\Http\Controllers\LaporanController::class, 'cetak'])->name('laporan.cetak');
 });
 
 require __DIR__.'/auth.php';

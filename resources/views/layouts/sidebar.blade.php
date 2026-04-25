@@ -57,7 +57,7 @@
             Web GIS
         </x-nav-link-custom>
 
-        <x-nav-link-custom href="#" icon="file-text">
+        <x-nav-link-custom href="{{ route('laporan.index') }}" :active="request()->routeIs('laporan.*')" icon="file-text">
             Laporan
         </x-nav-link-custom>
     </nav>
