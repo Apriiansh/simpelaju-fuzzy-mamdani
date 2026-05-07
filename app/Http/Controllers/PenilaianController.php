@@ -157,6 +157,31 @@ class PenilaianController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $penilaian = Penilaian::findOrFail($id);
+        $penilaian->delete();
+        return back()->with('success', 'Data penilaian berhasil dihapus.');
+    }
+
+    /**
+     * Mass calculate all residents who have house data but no evaluation yet,
+     * or refresh existing evaluations.
+     */
+    public function hitungMassal()
+    {
+        try {
+            $rumahs = \App\Models\Rumah::all();
+            $count = 0;
+
+            foreach ($rumahs as $rumah) {
+                // Use InputMapperService to map and trigger Mamdani calculation
+                // Periode default 2024 (bisa disesuaikan)
+                $this->inputMapper->runAssessment($rumah->penduduk_id, date('Y'));
+                $count++;
+            }
+
+            return back()->with('success', "Berhasil memproses $count data penilaian menggunakan Fuzzy Mamdani.");
+        } catch (\Exception $e) {
+            return back()->with('error', 'Gagal hitung massal: ' . $e->getMessage());
+        }
     }
 }

@@ -18,8 +18,8 @@ class DatabaseSeeder extends Seeder
         $this->call([
             UserSeeder::class,
             KelurahanSeeder::class,
-            KriteriaSeeder::class,
-            FuzzyRuleSeeder::class,
+            MassResidentSeeder::class,
+            FuzzyConfigurationSeeder::class,
         ]);
     }
 }

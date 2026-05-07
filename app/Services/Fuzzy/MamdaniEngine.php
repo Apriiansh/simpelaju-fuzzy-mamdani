@@ -42,7 +42,8 @@ class MamdaniEngine
                 'detail_perhitungan' => [
                     'fuzzification' => $fuzzifiedInput,
                     'inference' => $inferredResult,
-                    'score_raw' => $score
+                    'score_raw' => $score,
+                    'is_incomplete_rules' => empty($inferredResult) || array_sum($inferredResult) == 0
                 ]
             ]
         );

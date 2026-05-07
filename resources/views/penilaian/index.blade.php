@@ -9,6 +9,7 @@
                     Rekap Lengkap · Fuzzy Mamdani · Centroid COA
                 </p>
             </div>
+
         </div>
     </x-slot>
 
@@ -23,8 +24,8 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 @foreach($statsPerKelurahan as $stat)
                 @php
+                    $isLayak = $stat->rata_skor >= 50;
                     $rata = round($stat->rata_skor, 1);
-                    $isLayak = $rata >= 51;
                     $pct = min($rata, 100);
                 @endphp
                 <div class="bg-white/70 backdrop-blur-sm rounded-2xl border border-premium-border/50 p-6 shadow-sm hover:shadow-md transition-shadow">
@@ -70,7 +71,16 @@
                         <p class="text-[10px] text-forest/40 uppercase tracking-widest font-bold">{{ $penilaian->total() }} Data Tercatat</p>
                     </div>
                 </div>
-                <div class="text-[10px] text-forest/40 italic">← Geser kanan untuk melihat semua kolom</div>
+                <div class="flex items-center space-x-4">
+                    <div class="text-[10px] text-forest/40 italic hidden md:block">← Geser kanan untuk detail</div>
+                    
+                    <form action="{{ route('penilaian.hitung-massal') }}" method="POST" onsubmit="return confirm('Sistem akan memproses ulang seluruh data rumah penduduk menggunakan aturan fuzzy 81 rules. Lanjutkan?')">
+                        @csrf
+                        <button type="submit" class="bg-forest/5 hover:bg-forest text-forest hover:text-cream px-4 py-2 rounded-xl border border-forest/20 text-[9px] font-black uppercase tracking-widest transition-all duration-300 flex items-center group">
+                            <svg class="w-3 h-3 group-hover:rotate-180 transition-transform duration-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                        </button>
+                    </form>
+                </div>
             </div>
 
             {{-- Scrollable table --}}
@@ -99,7 +109,7 @@
                                 Aspek D — Komponen Material
                             </th>
                             {{-- Skor --}}
-                            <th colspan="4" class="px-4 py-2 text-center font-black uppercase tracking-widest text-[9px] text-forest bg-forest/5 border-r border-premium-border/20">
+                            <th colspan="5" class="px-4 py-2 text-center font-black uppercase tracking-widest text-[9px] text-forest bg-forest/5 border-r border-premium-border/20">
                                 Hasil Mamdani
                             </th>
                             {{-- Aksi --}}
@@ -131,6 +141,7 @@
                             <th class="px-3 py-2 whitespace-nowrap text-forest/60">Skor A</th>
                             <th class="px-3 py-2 whitespace-nowrap text-forest/60">Skor B</th>
                             <th class="px-3 py-2 whitespace-nowrap text-forest/60">Skor C</th>
+                            <th class="px-3 py-2 whitespace-nowrap text-forest/60">Skor D</th>
                             <th class="px-3 py-2 whitespace-nowrap text-forest font-black border-r border-premium-border/20">Crisp Z*</th>
                         </tr>
                     </thead>
@@ -147,6 +158,7 @@
                             $skorA = $nilaiMap['K1'] ?? $nilaiMap->first(fn($n) => str_contains($n->kriteria->nama ?? '', 'Keselamatan'));
                             $skorB = $nilaiMap['K2'] ?? $nilaiMap->first(fn($n) => str_contains($n->kriteria->nama ?? '', 'Kesehatan'));
                             $skorC = $nilaiMap['K3'] ?? $nilaiMap->first(fn($n) => str_contains($n->kriteria->nama ?? '', 'Kepadatan'));
+                            $skorD = $nilaiMap['K4'] ?? $nilaiMap->first(fn($n) => str_contains($n->kriteria->nama ?? '', 'Komponen'));
 
                             $isLayak = $hasil && $hasil->kategori_kelayakan === 'LAYAK';
                         @endphp
@@ -250,6 +262,9 @@
                             <td class="px-3 py-3 text-center text-[10px] font-mono">
                                 {{ $skorC ? number_format($skorC->nilai_input, 3) : '—' }}
                             </td>
+                            <td class="px-3 py-3 text-center text-[10px] font-mono">
+                                {{ $skorD ? number_format($skorD->nilai_input, 3) : '—' }}
+                            </td>
 
                             {{-- Skor Crisp (Defuzzifikasi) --}}
                             <td class="px-3 py-3 text-center">
@@ -311,7 +326,7 @@
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="21" class="px-6 py-16 text-center">
+                            <td colspan="22" class="px-6 py-16 text-center">
                                 <div class="flex flex-col items-center text-forest/30">
                                     <svg class="w-10 h-10 mb-3 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
