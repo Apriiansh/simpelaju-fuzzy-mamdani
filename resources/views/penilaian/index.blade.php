@@ -72,7 +72,7 @@
                     </div>
                 </div>
                 <div class="flex items-center space-x-4">
-                    <div class="text-[10px] text-forest/40 italic hidden md:block">← Geser kanan untuk detail</div>
+                    <div class="text-[10px] text-forest/40 italic hidden md:block">← geser →</div>
                     
                     <form action="{{ route('penilaian.hitung-massal') }}" method="POST" onsubmit="return confirm('Sistem akan memproses ulang seluruh data rumah penduduk menggunakan aturan fuzzy 81 rules. Lanjutkan?')">
                         @csrf

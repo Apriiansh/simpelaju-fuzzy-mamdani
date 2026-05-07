@@ -2,8 +2,9 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use App\Models\User;
+use Illuminate\Support\Facades\Hash;
 
 class UserSeeder extends Seeder
 {
@@ -12,11 +13,33 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
-        \App\Models\User::updateOrCreate(
+        // 1. ADMIN
+        User::updateOrCreate(
             ['email' => 'admin@plaju.go.id'],
             [
                 'name' => 'Administrator',
-                'password' => \Illuminate\Support\Facades\Hash::make('password'),
+                'password' => Hash::make('password'),
+                'role' => 'admin',
+            ]
+        );
+
+        // 2. OPERATOR
+        User::updateOrCreate(
+            ['email' => 'operator@plaju.go.id'],
+            [
+                'name' => 'Operator Plaju',
+                'password' => Hash::make('password'),
+                'role' => 'operator',
+            ]
+        );
+
+        // 3. CAMAT
+        User::updateOrCreate(
+            ['email' => 'camat@plaju.go.id'],
+            [
+                'name' => 'Camat Plaju',
+                'password' => Hash::make('password'),
+                'role' => 'camat',
             ]
         );
     }
