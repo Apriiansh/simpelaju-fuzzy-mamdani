@@ -73,7 +73,7 @@
                 </div>
                 <div class="flex items-center space-x-4">
                     <div class="text-[10px] text-forest/40 italic hidden md:block">← geser →</div>
-                    
+
                     <form action="{{ route('penilaian.hitung-massal') }}" method="POST" onsubmit="return confirm('Sistem akan memproses ulang seluruh data rumah penduduk menggunakan aturan fuzzy 81 rules. Lanjutkan?')">
                         @csrf
                         <button type="submit" class="bg-forest/5 hover:bg-forest text-forest hover:text-cream px-4 py-2 rounded-xl border border-forest/20 text-[9px] font-black uppercase tracking-widest transition-all duration-300 flex items-center group">
@@ -108,10 +108,12 @@
                             <th colspan="6" class="px-4 py-2 text-center font-black uppercase tracking-widest text-[9px] text-amber-600 bg-amber-50/50 border-r border-amber-100">
                                 Aspek D — Komponen Material
                             </th>
+                            @if(Auth::user()->role !== 'operator')
                             {{-- Skor --}}
                             <th colspan="5" class="px-4 py-2 text-center font-black uppercase tracking-widest text-[9px] text-forest bg-forest/5 border-r border-premium-border/20">
                                 Hasil Mamdani
                             </th>
+                            @endif
                             {{-- Aksi --}}
                             <th rowspan="2" class="px-4 py-3 text-center font-black uppercase tracking-widest text-[9px] text-forest/50 sticky right-0 bg-paper/90 z-10 min-w-[120px] border-l border-premium-border/20">
                                 Aksi
@@ -137,12 +139,14 @@
                             <th class="px-3 py-2 whitespace-nowrap bg-amber-50/30 text-amber-500">Kond. Atap</th>
                             <th class="px-3 py-2 whitespace-nowrap bg-amber-50/30 text-amber-500">Kond. Dinding</th>
                             <th class="px-3 py-2 whitespace-nowrap bg-amber-50/30 text-amber-500 border-r border-amber-100">Kond. Lantai</th>
+                            @if(Auth::user()->role !== 'operator')
                             {{-- Skor --}}
                             <th class="px-3 py-2 whitespace-nowrap text-forest/60">Skor A</th>
                             <th class="px-3 py-2 whitespace-nowrap text-forest/60">Skor B</th>
                             <th class="px-3 py-2 whitespace-nowrap text-forest/60">Skor C</th>
                             <th class="px-3 py-2 whitespace-nowrap text-forest/60">Skor D</th>
                             <th class="px-3 py-2 whitespace-nowrap text-forest font-black border-r border-premium-border/20">Crisp Z*</th>
+                            @endif
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-premium-border/20">
@@ -162,7 +166,7 @@
 
                             $isLayak = $hasil && $hasil->kategori_kelayakan === 'LAYAK';
                         @endphp
-                        <tr class="hover:bg-paper/30 transition-colors {{ $isLayak ? '' : 'bg-red-50/20' }}">
+                        <tr class="hover:bg-paper/30 transition-colors {{ (Auth::user()->role !== 'operator' && !$isLayak) ? 'bg-red-50/20' : '' }}">
                             {{-- Penduduk info (sticky) --}}
                             <td class="px-4 py-3 sticky left-0 bg-white/90 border-r border-premium-border/20 z-10">
                                 <div class="flex items-center space-x-3">
@@ -253,6 +257,7 @@
                             @endif
 
                             {{-- Skor per aspek (dari NilaiKriteria) --}}
+                            @if(Auth::user()->role !== 'operator')
                             <td class="px-3 py-3 text-center text-[10px] font-mono">
                                 {{ $skorA ? number_format($skorA->nilai_input, 3) : '—' }}
                             </td>
@@ -281,6 +286,7 @@
                                 <span class="text-forest/20 text-[9px] italic">—</span>
                                 @endif
                             </td>
+                            @endif
 
                             {{-- Tombol Aksi --}}
                             <td class="px-3 py-3 sticky right-0 bg-white/95 border-l border-premium-border/20 z-10">

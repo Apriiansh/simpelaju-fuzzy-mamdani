@@ -26,21 +26,32 @@ class PenilaianController extends Controller
      */
     public function index(Request $request)
     {
-        // Load all penilaian with full relations for the detail table
-        $penilaian = Penilaian::with([
+        $user = auth()->user();
+        $query = Penilaian::with([
                 'penduduk.kelurahan',
                 'penduduk.rumah',
                 'nilaiKriteria.kriteria',
                 'hasilSPK',
-            ])
-            ->latest()
-            ->paginate(20);
+            ]);
+
+        if ($user->role === 'operator') {
+            $query->whereHas('penduduk', function($q) use ($user) {
+                $q->where('kelurahan_id', $user->kelurahan_id);
+            });
+        }
+
+        $penilaian = $query->latest()->paginate(20);
 
         // Compute average crisp score per kelurahan for stats cards
-        $statsPerKelurahan = \App\Models\HasilSpk::join('penilaian', 'hasil_spk.penilaian_id', '=', 'penilaian.id')
+        $statsQuery = \App\Models\HasilSpk::join('penilaian', 'hasil_spk.penilaian_id', '=', 'penilaian.id')
             ->join('penduduk', 'penilaian.penduduk_id', '=', 'penduduk.id')
-            ->join('kelurahan', 'penduduk.kelurahan_id', '=', 'kelurahan.id')
-            ->select(
+            ->join('kelurahan', 'penduduk.kelurahan_id', '=', 'kelurahan.id');
+
+        if ($user->role === 'operator') {
+            $statsQuery->where('penduduk.kelurahan_id', $user->kelurahan_id);
+        }
+
+        $statsPerKelurahan = $statsQuery->select(
                 'kelurahan.nama as kelurahan_nama',
                 \Illuminate\Support\Facades\DB::raw('AVG(hasil_spk.nilai_defuzzifikasi) as rata_skor'),
                 \Illuminate\Support\Facades\DB::raw('COUNT(*) as total'),
@@ -58,9 +69,15 @@ class PenilaianController extends Controller
      */
     public function create(Request $request)
     {
+        $user = auth()->user();
         $penduduk_id = $request->query('penduduk_id');
         $penduduk = Penduduk::with('rumah')->findOrFail($penduduk_id);
-        
+
+        // Cek akses
+        if ($user->role === 'operator' && $penduduk->kelurahan_id !== $user->kelurahan_id) {
+            abort(403);
+        }
+
         if (!$penduduk->rumah) {
             return redirect()->route('rumah.create', ['penduduk_id' => $penduduk->id])
                 ->with('error', 'Lengkapi data rumah terlebih dahulu sebelum melakukan penilaian.');
@@ -101,8 +118,8 @@ class PenilaianController extends Controller
 
             foreach ($scores as $kodeKriteria => $nilaiInput) {
                 // If key is code (K1, K2...) find by code, else assume it's ID
-                $kriteria = is_numeric($kodeKriteria) 
-                    ? Kriteria::find($kodeKriteria) 
+                $kriteria = is_numeric($kodeKriteria)
+                    ? Kriteria::find($kodeKriteria)
                     : Kriteria::where('kode', $kodeKriteria)->first();
 
                 if ($kriteria) {
@@ -158,8 +175,45 @@ class PenilaianController extends Controller
     public function destroy(string $id)
     {
         $penilaian = Penilaian::findOrFail($id);
+
+        // Hanya bisa hapus jika status masih draft atau dikembalikan
+        if (!in_array($penilaian->verifikasi_status, ['draft', 'dikembalikan'])) {
+            return back()->with('error', 'Data yang sudah dikirim atau divalidasi tidak dapat dihapus.');
+        }
+
         $penilaian->delete();
         return back()->with('success', 'Data penilaian berhasil dihapus.');
+    }
+
+    public function kirimData(Penilaian $penilaian)
+    {
+        $penilaian->update(['verifikasi_status' => 'dikirim']);
+        return back()->with('success', 'Data berhasil dikirim ke Kecamatan.');
+    }
+
+    public function verifikasi(Request $request, Penilaian $penilaian)
+    {
+        $validated = $request->validate([
+            'status' => 'required|in:terverifikasi,dikembalikan',
+            'catatan' => 'required_if:status,dikembalikan|nullable|string',
+        ]);
+
+        $penilaian->update([
+            'verifikasi_status' => $validated['status'],
+            'catatan_revisi' => $validated['catatan'] ?? null,
+        ]);
+
+        return back()->with('success', 'Status verifikasi berhasil diperbarui.');
+    }
+
+    public function validasi(Penilaian $penilaian)
+    {
+        $penilaian->update([
+            'verifikasi_status' => 'valid',
+            'tanggal_validasi' => now(),
+        ]);
+
+        return back()->with('success', 'Data berhasil divalidasi dan dikunci.');
     }
 
     /**

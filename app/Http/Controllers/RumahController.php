@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Rumah;
 use App\Models\Penduduk;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class RumahController extends Controller
 {
@@ -13,7 +14,16 @@ class RumahController extends Controller
      */
     public function index()
     {
-        $rumah = Rumah::with('penduduk')->latest()->paginate(10);
+        $user = auth()->user();
+        $query = Rumah::with('penduduk');
+
+        if ($user->role === 'operator') {
+            $query->whereHas('penduduk', function($q) use ($user) {
+                $q->where('kelurahan_id', $user->kelurahan_id);
+            });
+        }
+
+        $rumah = $query->latest()->paginate(10);
         return view('rumah.index', compact('rumah'));
     }
 
@@ -22,15 +32,25 @@ class RumahController extends Controller
      */
     public function create(Request $request)
     {
+        $user = auth()->user();
         $penduduk_id = $request->query('penduduk_id');
         $penduduk = null;
+
         if ($penduduk_id) {
             $penduduk = Penduduk::findOrFail($penduduk_id);
+            // Cek akses
+            if ($user->role === 'operator' && $penduduk->kelurahan_id !== $user->kelurahan_id) {
+                abort(403);
+            }
         } else {
             // Only residents without house record
-            $penduduk = Penduduk::doesntHave('rumah')->get();
+            $query = Penduduk::doesntHave('rumah');
+            if ($user->role === 'operator') {
+                $query->where('kelurahan_id', $user->kelurahan_id);
+            }
+            $penduduk = $query->get();
         }
-        
+
         return view('rumah.create', compact('penduduk', 'penduduk_id'));
     }
 
@@ -39,22 +59,30 @@ class RumahController extends Controller
      */
     public function store(Request $request)
     {
+        $user = auth()->user();
+        $penduduk = Penduduk::findOrFail($request->penduduk_id);
+
+        // Cek akses
+        if ($user->role === 'operator' && $penduduk->kelurahan_id !== $user->kelurahan_id) {
+            abort(403);
+        }
+
         $validated = $request->validate([
             'penduduk_id' => 'required|exists:penduduk,id|unique:rumah,penduduk_id',
             'status_kepemilikan' => 'required|string',
             'luas_bangunan' => 'required|numeric|min:0',
-            
+
             // Pilar A
             'pondasi' => 'required|string',
             'kolom_balok' => 'required|string',
             'konstruksi_atap' => 'required|string',
-            
+
             // Pilar B
             'jendela' => 'required|string',
             'ventilasi' => 'required|string',
             'kamar_mandi' => 'required|string',
             'jarak_sumber_air' => 'required|string',
-            
+
             // Pilar D
             'material_atap' => 'required|string',
             'kondisi_atap' => 'required|string',
@@ -62,7 +90,7 @@ class RumahController extends Controller
             'kondisi_dinding' => 'required|string',
             'material_lantai' => 'required|string',
             'kondisi_lantai' => 'required|string',
-            
+
             'foto_rumah' => 'nullable|url',
         ]);
 
@@ -94,6 +122,11 @@ class RumahController extends Controller
      */
     public function edit(Rumah $rumah)
     {
+        $user = auth()->user();
+        // Cek akses
+        if ($user->role === 'operator' && $rumah->penduduk->kelurahan_id !== $user->kelurahan_id) {
+            abort(403);
+        }
         return view('rumah.edit', compact('rumah'));
     }
 

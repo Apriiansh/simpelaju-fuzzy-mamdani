@@ -13,7 +13,14 @@ class PendudukController extends Controller
      */
     public function index()
     {
-        $penduduk = Penduduk::with('kelurahan')->latest()->paginate(10);
+        $user = auth()->user();
+        $query = Penduduk::with('kelurahan');
+
+        if ($user->role === 'operator') {
+            $query->where('kelurahan_id', $user->kelurahan_id);
+        }
+
+        $penduduk = $query->latest()->paginate(10);
         return view('penduduk.index', compact('penduduk'));
     }
 
@@ -22,7 +29,12 @@ class PendudukController extends Controller
      */
     public function create()
     {
-        $kelurahan = Kelurahan::all();
+        $user = auth()->user();
+        if ($user->role === 'operator') {
+            $kelurahan = Kelurahan::where('id', $user->kelurahan_id)->get();
+        } else {
+            $kelurahan = Kelurahan::all();
+        }
         return view('penduduk.create', compact('kelurahan'));
     }
 
@@ -31,18 +43,29 @@ class PendudukController extends Controller
      */
     public function store(Request $request)
     {
-        $validated = $request->validate([
+        $user = auth()->user();
+
+        $rules = [
             'nik' => 'required|string|size:16|unique:penduduk,nik',
             'nama_lengkap' => 'required|string|max:255',
             'alamat' => 'required|string',
-            'kelurahan_id' => 'required|exists:kelurahan,id',
             'no_telepon' => 'nullable|string|max:20',
             'status_pernikahan' => 'required|string',
             'jumlah_tanggungan' => 'required|integer|min:0',
             'penghasilan' => 'required|numeric|min:0',
             'latitude' => 'nullable|numeric',
             'longitude' => 'nullable|numeric',
-        ]);
+        ];
+
+        if ($user->role !== 'operator') {
+            $rules['kelurahan_id'] = 'required|exists:kelurahan,id';
+        }
+
+        $validated = $request->validate($rules);
+
+        if ($user->role === 'operator') {
+            $validated['kelurahan_id'] = $user->kelurahan_id;
+        }
 
         Penduduk::create($validated);
 
@@ -63,7 +86,18 @@ class PendudukController extends Controller
      */
     public function edit(Penduduk $penduduk)
     {
-        $kelurahan = Kelurahan::all();
+        $user = auth()->user();
+
+        // Cek akses
+        if ($user->role === 'operator' && $penduduk->kelurahan_id !== $user->kelurahan_id) {
+            abort(403);
+        }
+
+        if ($user->role === 'operator') {
+            $kelurahan = Kelurahan::where('id', $user->kelurahan_id)->get();
+        } else {
+            $kelurahan = Kelurahan::all();
+        }
         return view('penduduk.edit', compact('penduduk', 'kelurahan'));
     }
 

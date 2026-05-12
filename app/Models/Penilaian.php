@@ -8,7 +8,16 @@ class Penilaian extends Model
 {
     protected $table = 'penilaian';
 
-    protected $fillable = ['penduduk_id', 'user_id', 'periode', 'tanggal_penilaian', 'status'];
+    protected $fillable = [
+        'penduduk_id',
+        'user_id',
+        'periode',
+        'tanggal_penilaian',
+        'status',
+        'verifikasi_status',
+        'catatan_revisi',
+        'tanggal_validasi'
+    ];
 
     public function penduduk()
     {
