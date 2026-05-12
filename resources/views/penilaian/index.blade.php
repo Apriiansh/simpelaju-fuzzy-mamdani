@@ -18,7 +18,7 @@
         {{-- =============================================
              STATS: Rata-rata Skor per Kelurahan
              ============================================= --}}
-        @if($statsPerKelurahan->isNotEmpty())
+        @if($statsPerKelurahan->isNotEmpty() && Auth::user()->role !== 'operator')
         <div>
             <h3 class="text-[10px] font-black text-forest/40 uppercase tracking-widest mb-4">Rata-rata Skor Crisp per Kelurahan</h3>
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">

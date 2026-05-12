@@ -39,6 +39,7 @@
                 </div>
             </div>
 
+            @if(Auth::user()->role !== 'operator')
             <!-- Layak Bantuan -->
             <div class="bg-forest p-8 rounded-[2rem] shadow-2xl shadow-forest/20 transition-all duration-500 hover:shadow-forest/30 hover:-translate-y-1 group relative overflow-hidden">
                 <div class="absolute -right-4 -top-4 text-cream/5 group-hover:text-cream/10 transition-colors duration-500">
@@ -66,6 +67,21 @@
                     </div>
                 </div>
             </div>
+        @else
+            <!-- Data Terproses untuk Operator -->
+            <div class="bg-white/70 backdrop-blur-md p-8 rounded-[2rem] shadow-sm border border-premium-border/50 transition-all duration-500 hover:shadow-xl hover:-translate-y-1 group relative overflow-hidden">
+                <div class="absolute -right-4 -top-4 text-forest/5 group-hover:text-forest/10 transition-colors duration-500">
+                    <svg class="w-32 h-32" fill="currentColor" viewBox="0 0 24 24"><path d="M9 12l2 2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+                </div>
+                <div class="relative z-10">
+                    <div class="text-[10px] font-black text-forest/40 uppercase tracking-[0.2em] mb-4">Data Terproses</div>
+                    <div class="text-4xl font-serif font-bold text-forest tracking-tighter">{{ number_format($total_dinilai) }}</div>
+                    <div class="mt-4 flex items-center text-[10px] font-bold text-forest/60 bg-paper/50 px-2.5 py-1 rounded-lg border border-premium-border/30 w-fit uppercase tracking-widest">
+                        MENUNGGU VERIFIKASI
+                    </div>
+                </div>
+            </div>
+        @endif
         </div>
 
         <div class="bg-white/50 backdrop-blur-lg overflow-hidden shadow-sm rounded-[3rem] border border-premium-border/50 p-12 relative">
@@ -79,7 +95,7 @@
                 </div>
                 <div>
                     <h1 class="text-4xl font-serif font-bold text-forest tracking-tight">SIMPELAJU</h1>
-                    <p class="text-forest/60 font-serif italic text-lg mt-1">Sistem Pendukung Keputusan Rehab Rumah Tidak Layak Huni</p>
+                    <p class="text-forest/60 font-serif italic text-lg mt-1">Sistem Pendukung Keputusan Rumah Tidak Layak Huni di Kecamatan Plaju</p>
                 </div>
             </div>
             
@@ -87,6 +103,7 @@
                 Platform ini menggunakan kecerdasan buatan berbasis <strong class="text-forest font-serif italic">Fuzzy Logic Mamdani</strong> untuk menentukan kelayakan hunian secara objektif. Anda dapat mulai dengan mengelola data penduduk, mencatat kondisi fisik rumah, dan melakukan kalkulasi penilaian secara otomatis.
             </div>
 
+            @if(Auth::user()->role !== 'operator')
             <!-- Ranking Table -->
             <div class="relative z-10 mb-12">
                 <div class="flex items-center justify-between mb-6">
@@ -140,6 +157,25 @@
                     </table>
                 </div>
             </div>
+        @else
+            <!-- Info untuk Operator -->
+            <div class="relative z-10 mb-12">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="text-xl font-serif font-bold text-forest uppercase tracking-widest">Data Penilaian</h3>
+                    <span class="px-4 py-1.5 bg-forest text-cream text-[10px] font-black rounded-full tracking-[0.2em]">MENUNGGU VERIFIKASI</span>
+                </div>
+                <div class="bg-paper/30 rounded-2xl border border-premium-border/50 p-8 text-center">
+                    <div class="w-12 h-12 rounded-full bg-forest/10 flex items-center justify-center mx-auto mb-4">
+                        <svg class="w-6 h-6 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                        </svg>
+                    </div>
+                    <p class="text-forest/70 font-bold text-lg mb-2">Proses Verifikasi Berjalan</p>
+                    <p class="text-forest/50 text-sm">Data penilaian Anda sedang dalam proses verifikasi oleh tingkat Kecamatan.</p>
+                    <p class="text-forest/40 text-xs mt-4">Hasil akhir dan peringkat akan tersedia setelah proses verifikasi selesai.</p>
+                </div>
+            </div>
+        @endif
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8 relative z-10">
                 <a href="{{ route('penduduk.index') }}" class="group bg-paper/30 p-8 rounded-2xl border border-premium-border/50 hover:bg-white hover:shadow-xl hover:-translate-y-1 transition-all duration-300">

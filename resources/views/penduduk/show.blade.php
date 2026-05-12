@@ -205,6 +205,7 @@
                 @if($penduduk->penilaian->isNotEmpty())
                     @php $latest = $penduduk->penilaian->last(); @endphp
                     @if($latest->hasilSPK)
+                        @if(Auth::user()->role !== 'operator')
                         <div class="text-center p-8 rounded-2xl {{ $latest->hasilSPK->kategori_kelayakan == 'LAYAK' ? 'bg-forest text-cream shadow-xl shadow-forest/20' : 'bg-red-50 text-red-800' }} border {{ $latest->hasilSPK->kategori_kelayakan == 'LAYAK' ? 'border-forest' : 'border-red-100' }}">
                             <div class="text-4xl font-serif font-extrabold mb-1">
                                 {{ $latest->hasilSPK->kategori_kelayakan }}
@@ -217,6 +218,22 @@
                                 Periode: {{ $latest->periode }}
                             </div>
                         </div>
+                        @else
+                        <div class="text-center p-8 rounded-2xl bg-paper/50 border border-premium-border/50">
+                            <div class="text-2xl font-serif font-bold text-forest/60 mb-2">
+                                <svg class="w-6 h-6 mx-auto mb-2 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                                </svg>
+                                Data Sedang Diproses
+                            </div>
+                            <p class="text-sm text-forest/50 font-medium">
+                                Data Anda sedang dalam proses verifikasi oleh Kecamatan
+                            </p>
+                            <div class="mt-4 pt-4 border-t border-premium-border/30 text-[10px] font-medium text-forest/40 uppercase tracking-widest">
+                                Periode: {{ $latest->periode }}
+                            </div>
+                        </div>
+                        @endif
                     @else
                         <div class="text-center p-8 bg-paper/50 rounded-2xl border border-premium-border/50">
                             <svg class="animate-spin h-8 w-8 text-premium-amber mx-auto mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">

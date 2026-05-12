@@ -71,7 +71,7 @@
                             </span>
                             @else
                             <span class="inline-flex items-center text-[9px] font-black text-amber uppercase tracking-widest bg-amber/5 px-3 py-1.5 rounded-lg border border-amber/10">
-                                <span class="w-1.5 h-1.5 rounded-full bg-amber mr-2"></span>
+                                 <span class="w-1.5 h-1.5 rounded-full bg-amber-500 mr-2 shadow-[0_0_8px_rgba(255,191,0,0.5)]"></span>
                                 Perlu Input
                             </span>
                             @endif
