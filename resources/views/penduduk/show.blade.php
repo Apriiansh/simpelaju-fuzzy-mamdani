@@ -215,8 +215,8 @@
                         {{-- VIEW UNTUK ADMIN/CAMAT --}}
                         @if($latest->hasilSPK)
                             <div class="text-center p-8 rounded-2xl {{ $latest->hasilSPK->kategori_kelayakan == 'LAYAK' ? 'bg-forest text-cream shadow-xl shadow-forest/20' : 'bg-red-50 text-red-800' }} border {{ $latest->hasilSPK->kategori_kelayakan == 'LAYAK' ? 'border-forest' : 'border-red-100' }}">
-                                <div class="text-4xl font-serif font-extrabold mb-1">
-                                    {{ $latest->hasilSPK->kategori_kelayakan }}
+                                <div class="text-3xl font-serif font-extrabold mb-1">
+                                    {{ $latest->hasilSPK->kategori_kelayakan == 'LAYAK' ? 'BERHAK MENERIMA BANTUAN' : 'BELUM PRIORITAS BANTUAN' }}
                                 </div>
                                 <div class="w-12 h-0.5 {{ $latest->hasilSPK->kategori_kelayakan == 'LAYAK' ? 'bg-premium-amber' : 'bg-red-300' }} mx-auto mb-4"></div>
                                 <p class="text-xs uppercase font-bold tracking-[0.2em] {{ $latest->hasilSPK->kategori_kelayakan == 'LAYAK' ? 'text-cream/60' : 'text-red-400' }}">
@@ -240,15 +240,12 @@
                         @if($latest->verifikasi_status === 'valid' || $latest->verifikasi_status === 'terverifikasi')
                             @if($latest->hasilSPK)
                                 <div class="text-center p-8 rounded-2xl {{ $latest->hasilSPK->kategori_kelayakan == 'LAYAK' ? 'bg-forest text-cream shadow-xl shadow-forest/20' : 'bg-red-50 text-red-800' }} border {{ $latest->hasilSPK->kategori_kelayakan == 'LAYAK' ? 'border-forest' : 'border-red-100' }}">
-                                    <div class="text-2xl font-serif font-bold mb-1">
-                                        {{ $latest->hasilSPK->kategori_kelayakan }}
+                                    <div class="text-xl font-serif font-bold mb-2">
+                                        {{ $latest->hasilSPK->kategori_kelayakan == 'LAYAK' ? 'BERHAK MENERIMA BANTUAN' : 'BUKAN PRIORITAS BANTUAN' }}
                                     </div>
-                                    <p class="text-[10px] font-bold uppercase tracking-widest mb-4 opacity-70">
+                                    <p class="text-[10px] font-bold uppercase tracking-widest opacity-70">
                                         {{ $latest->verifikasi_status === 'valid' ? 'Hasil Final / Disahkan' : 'Sudah Terverifikasi' }}
                                     </p>
-                                    <div class="pt-4 border-t border-current opacity-20 text-[10px]">
-                                        Skor: {{ number_format($latest->hasilSPK->nilai_defuzzifikasi, 2) }}
-                                    </div>
                                 </div>
                             @else
                                 <div class="text-center p-8 rounded-2xl bg-paper/50 border border-premium-border/50">

@@ -25,67 +25,71 @@
             Dashboard
         </x-nav-link-custom>
 
+        {{-- =============================================
+             SECTION: MANAJEMEN DATA
+             ============================================= --}}
         <div class="pt-4 pb-2 border-b border-premium-border/10">
             <span class="text-[10px] font-bold text-premium-amber-light/60 uppercase tracking-[0.2em]">Manajemen Data</span>
         </div>
 
-        @if(Auth::user()->role === 'admin')
-        <x-nav-link-custom href="{{ route('kelurahan.index') }}" :active="request()->routeIs('kelurahan.*')" icon="map">
-            Data Kelurahan
-        </x-nav-link-custom>
-
-        @if(Auth::user()->role === 'operator' || Auth::user()->role === 'admin' || Auth::user()->role === 'camat')
+        {{-- All roles see Data Penduduk --}}
         <x-nav-link-custom href="{{ route('penduduk.index') }}" :active="request()->routeIs('penduduk.*')" icon="users">
             Data Penduduk
         </x-nav-link-custom>
+
+        @if(Auth::user()->role === 'admin')
+            <x-nav-link-custom href="{{ route('kelurahan.index') }}" :active="request()->routeIs('kelurahan.*')" icon="map">
+                Data Kelurahan
+            </x-nav-link-custom>
+
+            <x-nav-link-custom href="{{ route('users.index') }}" :active="request()->routeIs('users.*')" icon="user-cog">
+                Manajemen User
+            </x-nav-link-custom>
         @endif
 
-        <x-nav-link-custom href="{{ route('users.index') }}" :active="request()->routeIs('users.*')" icon="user-cog">
-            Manajemen User
-        </x-nav-link-custom>
-        @endif
-
-
-
+        {{-- =============================================
+             SECTION: PROSES SPK
+             ============================================= --}}
         <div class="pt-4 pb-2 border-b border-premium-border/10">
             <span class="text-[10px] font-bold text-premium-amber-light/60 uppercase tracking-[0.2em]">Proses SPK</span>
         </div>
 
         @if(Auth::user()->role === 'admin')
-        <x-nav-link-custom href="{{ route('kriteria-fuzzy.index') }}" :active="request()->routeIs('kriteria-fuzzy.*')" icon="clipboard-list">
-            Kriteria & Fuzzy
-        </x-nav-link-custom>
+            <x-nav-link-custom href="{{ route('kriteria-fuzzy.index') }}" :active="request()->routeIs('kriteria-fuzzy.*')" icon="clipboard-list">
+                Kriteria & Fuzzy
+            </x-nav-link-custom>
+            
+            <x-nav-link-custom href="{{ route('penilaian.index') }}" :active="request()->routeIs('penilaian.*')" icon="check-square">
+                Verifikasi Usulan
+            </x-nav-link-custom>
         @endif
 
         @if(Auth::user()->role === 'operator')
-        <x-nav-link-custom href="{{ route('penilaian.index') }}" :active="request()->routeIs('penilaian.*')" icon="clipboard-list">
-            Input Penilaian
-        </x-nav-link-custom>
-        @endif
-
-        @if(Auth::user()->role === 'admin')
-        <x-nav-link-custom href="{{ route('penilaian.index') }}" :active="request()->routeIs('penilaian.*')" icon="check-square">
-            Verifikasi Usulan
-        </x-nav-link-custom>
+            <x-nav-link-custom href="{{ route('penilaian.index') }}" :active="request()->routeIs('penilaian.*')" icon="clipboard-list">
+                Data Rumah
+            </x-nav-link-custom>
         @endif
 
         @if(Auth::user()->role === 'camat')
-        <x-nav-link-custom href="{{ route('penilaian.index') }}" :active="request()->routeIs('penilaian.*')" icon="award">
-            Validasi & Perankingan
-        </x-nav-link-custom>
+            <x-nav-link-custom href="{{ route('penilaian.index') }}" :active="request()->routeIs('penilaian.*')" icon="award">
+                Validasi Rekomendasi
+            </x-nav-link-custom>
         @endif
 
+        {{-- =============================================
+             SECTION: ANALISIS & OUTPUT
+             ============================================= --}}
         @if(Auth::user()->role === 'admin' || Auth::user()->role === 'camat')
-        <div class="pt-4 pb-2 border-b border-premium-border/10">
-            <span class="text-[10px] font-bold text-premium-amber-light/60 uppercase tracking-[0.2em]">GIS & Laporan</span>
-        </div>
-        <x-nav-link-custom href="{{ route('web-gis.index') }}" :active="request()->routeIs('web-gis.*')" icon="map-pin">
-            Web GIS
-        </x-nav-link-custom>
+            <div class="pt-4 pb-2 border-b border-premium-border/10">
+                <span class="text-[10px] font-bold text-premium-amber-light/60 uppercase tracking-[0.2em]">Analisis & Output</span>
+            </div>
+            <x-nav-link-custom href="{{ route('web-gis.index') }}" :active="request()->routeIs('web-gis.*')" icon="map-pin">
+                Web GIS (Pemetaan)
+            </x-nav-link-custom>
 
-        <x-nav-link-custom href="{{ route('laporan.index') }}" :active="request()->routeIs('laporan.*')" icon="file-text">
-            Laporan
-        </x-nav-link-custom>
+            <x-nav-link-custom href="{{ route('laporan.index') }}" :active="request()->routeIs('laporan.*')" icon="file-text">
+                Laporan & Cetak
+            </x-nav-link-custom>
         @endif
     </nav>
 </div>

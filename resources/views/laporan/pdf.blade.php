@@ -65,7 +65,7 @@
 
     @if(!empty($filters))
     <div class="filter-info">
-        <strong>Filter Diterapkan:</strong> 
+        <!-- <strong>Filter Diterapkan:</strong>  -->
         @foreach($filters as $key => $value)
             <span style="margin-right: 15px;">{{ ucfirst($key) }}: {{ $value }}</span>
         @endforeach

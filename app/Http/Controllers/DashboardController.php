@@ -29,9 +29,10 @@ class DashboardController extends Controller
 
         $stats = [
             'total_penduduk' => $pendudukQuery->count(),
-            'total_dinilai' => $penilaianQuery->count(),
+            'total_dinilai' => $penilaianQuery->clone()->where('verifikasi_status', '!=', 'draft')->count(),
             'total_layak' => $hasilSpkQuery->clone()->where('kategori_kelayakan', 'LAYAK')->count(),
             'total_tidak_layak' => $hasilSpkQuery->clone()->where('kategori_kelayakan', 'TIDAK_LAYAK')->count(),
+            'total_belum_verifikasi' => $penilaianQuery->clone()->where('verifikasi_status', 'dikirim')->count(),
         ];
 
         // Fetch top 5 candidates by defuzzification score

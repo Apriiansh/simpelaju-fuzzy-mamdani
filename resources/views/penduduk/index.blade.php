@@ -41,7 +41,7 @@
             </div>
             <div>
                 <p class="text-xs font-black text-forest uppercase tracking-[0.2em] mb-1">Antrian Validasi</p>
-                <p class="text-sm text-forest/70 font-medium leading-relaxed">Terdapat usulan yang telah diverifikasi. Silahkan lakukan pengesahan pada menu <a href="{{ route('penilaian.index') }}" class="font-bold text-forest underline decoration-forest/30 underline-offset-4 hover:decoration-forest transition-all">Validasi & Perankingan</a>.</p>
+                <p class="text-sm text-forest/70 font-medium leading-relaxed">Terdapat usulan yang telah diverifikasi. Silahkan lakukan pengesahan pada menu <a href="{{ route('penilaian.index') }}" class="font-bold text-forest underline decoration-forest/30 underline-offset-4 hover:decoration-forest transition-all">Validasi Rekomendasi</a>.</p>
             </div>
         </div>
     </div>

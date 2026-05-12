@@ -16,7 +16,8 @@ class LaporanController extends Controller
         $query = HasilSpk::with(['penilaian.penduduk.kelurahan', 'penilaian.penduduk.rumah'])
             ->join('penilaian', 'hasil_spk.penilaian_id', '=', 'penilaian.id')
             ->join('penduduk', 'penilaian.penduduk_id', '=', 'penduduk.id')
-            ->select('hasil_spk.*', 'penduduk.nama_lengkap', 'penduduk.nik');
+            ->select('hasil_spk.*', 'penduduk.nama_lengkap', 'penduduk.nik', 'penilaian.verifikasi_status')
+            ->where('penilaian.verifikasi_status', 'valid'); // Hanya yang sudah disahkan Camat
 
         if ($request->filled('kelurahan_id')) {
             $query->where('penduduk.kelurahan_id', $request->kelurahan_id);
@@ -24,6 +25,14 @@ class LaporanController extends Controller
 
         if ($request->filled('status')) {
             $query->where('hasil_spk.kategori_kelayakan', $request->status);
+        }
+
+        if ($request->filled('tgl_mulai')) {
+            $query->whereDate('penilaian.tanggal_penilaian', '>=', $request->tgl_mulai);
+        }
+
+        if ($request->filled('tgl_selesai')) {
+            $query->whereDate('penilaian.tanggal_penilaian', '<=', $request->tgl_selesai);
         }
 
         // Default order by score descending (Priority 1 is the highest score)
@@ -39,7 +48,8 @@ class LaporanController extends Controller
         $query = HasilSpk::with(['penilaian.penduduk.kelurahan', 'penilaian.penduduk.rumah'])
             ->join('penilaian', 'hasil_spk.penilaian_id', '=', 'penilaian.id')
             ->join('penduduk', 'penilaian.penduduk_id', '=', 'penduduk.id')
-            ->select('hasil_spk.*', 'penduduk.nama_lengkap', 'penduduk.nik');
+            ->select('hasil_spk.*', 'penduduk.nama_lengkap', 'penduduk.nik', 'penilaian.verifikasi_status')
+            ->where('penilaian.verifikasi_status', 'valid'); // Hanya yang sudah disahkan Camat
 
         $filters = [];
 
@@ -52,6 +62,16 @@ class LaporanController extends Controller
         if ($request->filled('status')) {
             $query->where('hasil_spk.kategori_kelayakan', $request->status);
             $filters['status'] = str_replace('_', ' ', $request->status);
+        }
+
+        if ($request->filled('tgl_mulai')) {
+            $query->whereDate('penilaian.tanggal_penilaian', '>=', $request->tgl_mulai);
+            $filters['tgl_mulai'] = $request->tgl_mulai;
+        }
+
+        if ($request->filled('tgl_selesai')) {
+            $query->whereDate('penilaian.tanggal_penilaian', '<=', $request->tgl_selesai);
+            $filters['tgl_selesai'] = $request->tgl_selesai;
         }
 
         $query->orderBy('hasil_spk.nilai_defuzzifikasi', 'desc');

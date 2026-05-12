@@ -1,67 +1,88 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="flex justify-between items-end py-2">
-            <div>
-                <h2 class="font-serif font-bold text-2xl text-forest leading-tight">
-                    Laporan Cetak & Prioritas
-                </h2>
-                <p class="text-xs text-forest/40 font-bold tracking-widest uppercase mt-1">
-                    Export Daftar Prioritas Penerima Bantuan RTLH (Format Resmi)
-                </p>
-            </div>
-            <div>
-                <form action="{{ route('laporan.cetak') }}" method="GET" target="_blank">
-                    @if(request('kelurahan_id')) <input type="hidden" name="kelurahan_id" value="{{ request('kelurahan_id') }}"> @endif
-                    @if(request('status')) <input type="hidden" name="status" value="{{ request('status') }}"> @endif
-                    <button type="submit" class="flex items-center gap-2 px-6 py-3 bg-forest hover:bg-forest-dark text-cream rounded-xl text-sm font-bold shadow-lg shadow-forest/20 transition-all hover:-translate-y-0.5">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
-                        Generate PDF
-                    </button>
-                </form>
-            </div>
+        <div class="py-2">
+            <h2 class="font-serif font-bold text-2xl text-forest leading-tight">
+                Laporan Cetak & Prioritas
+            </h2>
+            <p class="text-xs text-forest/40 font-bold tracking-widest uppercase mt-1">
+                Export Daftar Prioritas Penerima Bantuan RTLH (Format Resmi)
+            </p>
         </div>
     </x-slot>
 
     <div class="space-y-6 pb-12">
+
+        {{-- Info Banner --}}
+        <!-- <div class="bg-forest/5 border border-forest/10 rounded-2xl p-4 flex items-center shadow-sm">
+            <div class="w-10 h-10 bg-forest/10 rounded-xl flex items-center justify-center text-forest mr-4 shrink-0">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            </div>
+            <div>
+                <p class="text-sm text-forest/70 font-medium">Laporan ini hanya menampilkan data usulan yang telah **Disahkan (Status: VALID)** oleh Camat. Data yang masih dalam proses verifikasi tidak akan muncul di sini.</p>
+            </div>
+        </div> -->
         
         {{-- =============================================
              FILTER PANEL
              ============================================= --}}
         <div class="bg-white/70 backdrop-blur-sm rounded-2xl border border-premium-border/50 shadow-sm p-6">
-            <form action="{{ route('laporan.index') }}" method="GET" class="flex flex-col md:flex-row gap-4 items-end">
-                
-                <div class="w-full md:w-1/3">
-                    <label class="block text-[10px] font-black text-forest/40 uppercase tracking-widest mb-2">Filter Kelurahan</label>
-                    <select name="kelurahan_id" class="w-full border-premium-border/30 rounded-xl bg-paper text-forest focus:ring-forest focus:border-forest text-sm">
-                        <option value="">Semua Kelurahan</option>
-                        @foreach($kelurahans as $kel)
-                            <option value="{{ $kel->id }}" {{ request('kelurahan_id') == $kel->id ? 'selected' : '' }}>
-                                {{ $kel->nama }}
-                            </option>
-                        @endforeach
-                    </select>
+            <form action="{{ route('laporan.index') }}" method="GET">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+                    
+                    <div class="space-y-2">
+                        <label class="block text-[10px] font-black text-forest/40 uppercase tracking-widest">Wilayah Kelurahan</label>
+                        <select name="kelurahan_id" class="w-full border-premium-border/30 rounded-xl bg-paper text-forest focus:ring-forest focus:border-forest text-sm">
+                            <option value="">Semua Kelurahan</option>
+                            @foreach($kelurahans as $kel)
+                                <option value="{{ $kel->id }}" {{ request('kelurahan_id') == $kel->id ? 'selected' : '' }}>
+                                    {{ $kel->nama }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="block text-[10px] font-black text-forest/40 uppercase tracking-widest">Status Kelayakan</label>
+                        <select name="status" class="w-full border-premium-border/30 rounded-xl bg-paper text-forest focus:ring-forest focus:border-forest text-sm">
+                            <option value="">Semua Status</option>
+                            <option value="LAYAK" {{ request('status') === 'LAYAK' ? 'selected' : '' }}>Hanya Layak Bantuan</option>
+                            <option value="TIDAK_LAYAK" {{ request('status') === 'TIDAK_LAYAK' ? 'selected' : '' }}>Hanya Tidak Layak</option>
+                        </select>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="block text-[10px] font-black text-forest/40 uppercase tracking-widest">Tanggal Mulai</label>
+                        <input type="date" name="tgl_mulai" value="{{ request('tgl_mulai') }}" class="w-full border-premium-border/30 rounded-xl bg-paper text-forest focus:ring-forest focus:border-forest text-sm">
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="block text-[10px] font-black text-forest/40 uppercase tracking-widest">Tanggal Akhir</label>
+                        <input type="date" name="tgl_selesai" value="{{ request('tgl_selesai') }}" class="w-full border-premium-border/30 rounded-xl bg-paper text-forest focus:ring-forest focus:border-forest text-sm">
+                    </div>
                 </div>
 
-                <div class="w-full md:w-1/3">
-                    <label class="block text-[10px] font-black text-forest/40 uppercase tracking-widest mb-2">Filter Status Kelayakan</label>
-                    <select name="status" class="w-full border-premium-border/30 rounded-xl bg-paper text-forest focus:ring-forest focus:border-forest text-sm">
-                        <option value="">Semua Status</option>
-                        <option value="LAYAK" {{ request('status') === 'LAYAK' ? 'selected' : '' }}>Hanya Layak Bantuan</option>
-                        <option value="TIDAK_LAYAK" {{ request('status') === 'TIDAK_LAYAK' ? 'selected' : '' }}>Hanya Tidak Layak</option>
-                    </select>
-                </div>
+                <div class="mt-6 pt-6 border-t border-premium-border/20 flex flex-wrap gap-3 items-center justify-between">
+                    <div class="flex gap-2">
+                        <button type="submit" class="bg-forest text-cream px-6 py-2.5 rounded-xl text-sm font-bold shadow-lg shadow-forest/20 hover:bg-forest-dark transition-all hover:-translate-y-0.5">
+                            Terapkan Filter
+                        </button>
+                        @if(request()->anyFilled(['kelurahan_id', 'status', 'tgl_mulai', 'tgl_selesai']))
+                        <a href="{{ route('laporan.index') }}" class="px-4 py-2.5 rounded-xl border border-premium-border/40 text-forest/60 hover:bg-paper transition-colors flex items-center justify-center gap-2 text-sm font-medium">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                            Reset
+                        </a>
+                        @endif
+                    </div>
 
-                <div class="w-full md:w-1/3 flex gap-2">
-                    <button type="submit" class="flex-1 bg-forest/10 hover:bg-forest/20 text-forest px-4 py-2.5 rounded-xl text-sm font-bold transition-colors">
-                        Terapkan Filter
+                    @if($laporan->total() > 0)
+                    <button type="button" 
+                            onclick="window.open('{{ route('laporan.cetak', request()->all()) }}', '_blank')"
+                            class="flex items-center gap-2 px-6 py-2.5 bg-premium-amber text-forest rounded-xl text-sm font-black uppercase tracking-widest shadow-lg shadow-premium-amber/20 hover:bg-amber-500 transition-all hover:-translate-y-0.5">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+                        Cetak PDF
                     </button>
-                    @if(request()->anyFilled(['kelurahan_id', 'status']))
-                    <a href="{{ route('laporan.index') }}" class="px-4 py-2.5 rounded-xl border border-premium-border/40 text-forest/60 hover:bg-paper transition-colors flex items-center justify-center" title="Reset Filter">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                    </a>
                     @endif
                 </div>
-
             </form>
         </div>
 
@@ -128,7 +149,8 @@
                         <tr>
                             <td colspan="5" class="px-6 py-12 text-center text-forest/40">
                                 <svg class="w-12 h-12 mx-auto mb-3 opacity-20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path></svg>
-                                <p class="text-sm font-bold uppercase tracking-widest">Tidak ada data ditemukan</p>
+                                <p class="text-sm font-bold uppercase tracking-widest mb-1">Belum ada data prioritas yang valid</p>
+                                <p class="text-[10px] uppercase tracking-[0.2em] opacity-60">Pastikan Camat telah melakukan validasi pada menu penilaian</p>
                             </td>
                         </tr>
                         @endforelse
@@ -142,6 +164,7 @@
             </div>
             @endif
         </div>
+
 
     </div>
 </x-app-layout>

@@ -32,7 +32,6 @@ Route::middleware('auth')->group(function () {
 
         Route::resource('rumah', RumahController::class);
         Route::post('rumah/{rumah}/recalculate', [RumahController::class, 'recalculate'])->name('rumah.recalculate');
-        Route::post('penilaian/hitung-massal', [PenilaianController::class, 'hitungMassal'])->name('penilaian.hitung-massal');
         Route::post('penilaian/{penilaian}/kirim', [PenilaianController::class, 'kirimData'])->name('penilaian.kirim');
     });
 
@@ -57,6 +56,7 @@ Route::middleware('auth')->group(function () {
         Route::resource('users', UserController::class);
         Route::get('kriteria-fuzzy', [\App\Http\Controllers\KriteriaFuzzyController::class, 'index'])->name('kriteria-fuzzy.index');
         Route::post('penilaian/{penilaian}/verifikasi', [PenilaianController::class, 'verifikasi'])->name('penilaian.verifikasi');
+        Route::post('penilaian/hitung-massal', [PenilaianController::class, 'hitungMassal'])->name('penilaian.hitung-massal');
     });
 
     // Route untuk Camat (Pimpinan)
