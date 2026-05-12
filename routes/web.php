@@ -24,12 +24,31 @@ Route::middleware('auth')->group(function () {
 
     // Route untuk Operator Lurah
     Route::middleware('role:operator')->group(function () {
-        Route::resource('penduduk', PendudukController::class);
+        Route::get('penduduk/create', [PendudukController::class, 'create'])->name('penduduk.create');
+        Route::post('penduduk', [PendudukController::class, 'store'])->name('penduduk.store');
+        Route::get('penduduk/{penduduk}/edit', [PendudukController::class, 'edit'])->name('penduduk.edit');
+        Route::put('penduduk/{penduduk}', [PendudukController::class, 'update'])->name('penduduk.update');
+        Route::delete('penduduk/{penduduk}', [PendudukController::class, 'destroy'])->name('penduduk.destroy');
+
         Route::resource('rumah', RumahController::class);
         Route::post('rumah/{rumah}/recalculate', [RumahController::class, 'recalculate'])->name('rumah.recalculate');
-        Route::resource('penilaian', PenilaianController::class);
         Route::post('penilaian/hitung-massal', [PenilaianController::class, 'hitungMassal'])->name('penilaian.hitung-massal');
         Route::post('penilaian/{penilaian}/kirim', [PenilaianController::class, 'kirimData'])->name('penilaian.kirim');
+    });
+
+    // Penilaian & Penduduk - Akses Campuran
+    Route::get('penduduk', [PendudukController::class, 'index'])->name('penduduk.index');
+    Route::get('penduduk/{penduduk}', [PendudukController::class, 'show'])->name('penduduk.show');
+
+    Route::get('penilaian', [PenilaianController::class, 'index'])->name('penilaian.index');
+    Route::get('penilaian/{penilaian}', [PenilaianController::class, 'show'])->name('penilaian.show');
+    
+    Route::middleware('role:operator')->group(function() {
+        Route::get('penilaian/create', [PenilaianController::class, 'create'])->name('penilaian.create');
+        Route::post('penilaian', [PenilaianController::class, 'store'])->name('penilaian.store');
+        Route::get('penilaian/{penilaian}/edit', [PenilaianController::class, 'edit'])->name('penilaian.edit');
+        Route::put('penilaian/{penilaian}', [PenilaianController::class, 'update'])->name('penilaian.update');
+        Route::delete('penilaian/{penilaian}', [PenilaianController::class, 'destroy'])->name('penilaian.destroy');
     });
 
     // Route untuk Admin Camat

@@ -24,7 +24,7 @@
                 <div class="bg-white rounded-[2.5rem] shadow-sm border border-premium-border/50 overflow-hidden">
                     <div class="px-10 py-6 bg-slate-50 border-b border-premium-border/30 flex items-center justify-between">
                         <h3 class="font-serif text-xl font-bold text-slate-800">1. Identitas & Aspek Kepadatan</h3>
-                        <span class="px-4 py-1 bg-slate-200 text-slate-600 text-[10px] font-black rounded-full uppercase tracking-widest">Aspek C</span>
+                        <span class="px-4 py-1 bg-slate-200 text-slate-600 text-[10px] font-black rounded-full uppercase tracking-widest">Aspek Kepadatan</span>
                     </div>
                     <div class="p-10">
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
@@ -76,7 +76,7 @@
                 <div class="bg-white rounded-[2.5rem] shadow-sm border border-premium-border/50 overflow-hidden">
                     <div class="px-10 py-6 bg-slate-50 border-b border-premium-border/30 flex items-center justify-between">
                         <h3 class="font-serif text-xl font-bold text-slate-800">2. Aspek Keselamatan Bangunan</h3>
-                        <span class="px-4 py-1 bg-slate-200 text-slate-600 text-[10px] font-black rounded-full uppercase tracking-widest">Aspek A</span>
+                        <span class="px-4 py-1 bg-slate-200 text-slate-600 text-[10px] font-black rounded-full uppercase tracking-widest">Aspek Keselamatan</span>
                     </div>
                     <div class="p-10">
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -111,7 +111,7 @@
                 <div class="bg-white rounded-[2.5rem] shadow-sm border border-premium-border/50 overflow-hidden">
                     <div class="px-10 py-6 bg-slate-50 border-b border-premium-border/30 flex items-center justify-between">
                         <h3 class="font-serif text-xl font-bold text-slate-800">3. Aspek Kesehatan Penghuni</h3>
-                        <span class="px-4 py-1 bg-slate-200 text-slate-600 text-[10px] font-black rounded-full uppercase tracking-widest">Aspek B</span>
+                        <span class="px-4 py-1 bg-slate-200 text-slate-600 text-[10px] font-black rounded-full uppercase tracking-widest">Aspek Kesehatan</span>
                     </div>
                     <div class="p-10">
                         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -152,7 +152,7 @@
                 <div class="bg-white rounded-[2.5rem] shadow-sm border border-premium-border/50 overflow-hidden">
                     <div class="px-10 py-6 bg-slate-50 border-b border-premium-border/30 flex items-center justify-between">
                         <h3 class="font-serif text-xl font-bold text-slate-800">4. Aspek Komponen Bangunan (Material)</h3>
-                        <span class="px-4 py-1 bg-slate-200 text-slate-600 text-[10px] font-black rounded-full uppercase tracking-widest">Aspek D</span>
+                        <span class="px-4 py-1 bg-slate-200 text-slate-600 text-[10px] font-black rounded-full uppercase tracking-widest">Aspek Komponen Material</span>
                     </div>
                     <div class="p-10">
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-10">

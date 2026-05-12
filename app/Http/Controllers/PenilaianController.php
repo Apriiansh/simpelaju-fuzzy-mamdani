@@ -34,10 +34,27 @@ class PenilaianController extends Controller
                 'hasilSPK',
             ]);
 
+        $statusFilter = $request->query('status');
+
         if ($user->role === 'operator') {
             $query->whereHas('penduduk', function($q) use ($user) {
                 $q->where('kelurahan_id', $user->kelurahan_id);
             });
+            if ($statusFilter) {
+                $query->where('verifikasi_status', $statusFilter);
+            }
+        } elseif ($user->role === 'admin') {
+            // Admin can see everything except draft
+            $query->where('verifikasi_status', '!=', 'draft');
+            if ($statusFilter) {
+                $query->where('verifikasi_status', $statusFilter);
+            }
+        } elseif ($user->role === 'camat') {
+            // Camat can see verified and valid
+            $query->whereIn('verifikasi_status', ['terverifikasi', 'valid']);
+            if ($statusFilter) {
+                $query->where('verifikasi_status', $statusFilter);
+            }
         }
 
         $penilaian = $query->latest()->paginate(20);
@@ -131,8 +148,8 @@ class PenilaianController extends Controller
                 }
             }
 
-            // TRIGGER FUZZY ENGINE
-            $this->fuzzyEngine->calculate($penilaian);
+            // TRIGGER FUZZY ENGINE - REMOVED FROM STORE
+            // Logic moved to verifikasi() stage as per business requirement
 
             DB::commit();
 
@@ -198,16 +215,27 @@ class PenilaianController extends Controller
             'catatan' => 'required_if:status,dikembalikan|nullable|string',
         ]);
 
-        $penilaian->update([
-            'verifikasi_status' => $validated['status'],
-            'catatan_revisi' => $validated['catatan'] ?? null,
-        ]);
+        DB::transaction(function () use ($penilaian, $validated) {
+            $penilaian->update([
+                'verifikasi_status' => $validated['status'],
+                'catatan_revisi' => $validated['catatan'] ?? null,
+            ]);
+
+            // TRIGGER FUZZY ENGINE only if verified
+            if ($validated['status'] === 'terverifikasi') {
+                $this->fuzzyEngine->calculate($penilaian);
+            }
+        });
 
         return back()->with('success', 'Status verifikasi berhasil diperbarui.');
     }
 
     public function validasi(Penilaian $penilaian)
     {
+        if ($penilaian->verifikasi_status !== 'terverifikasi') {
+            return back()->with('error', 'Hanya data dengan status Terverifikasi yang dapat divalidasi.');
+        }
+
         $penilaian->update([
             'verifikasi_status' => 'valid',
             'tanggal_validasi' => now(),

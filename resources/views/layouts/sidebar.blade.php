@@ -34,16 +34,18 @@
             Data Kelurahan
         </x-nav-link-custom>
 
+        @if(Auth::user()->role === 'operator' || Auth::user()->role === 'admin' || Auth::user()->role === 'camat')
+        <x-nav-link-custom href="{{ route('penduduk.index') }}" :active="request()->routeIs('penduduk.*')" icon="users">
+            Data Penduduk
+        </x-nav-link-custom>
+        @endif
+
         <x-nav-link-custom href="{{ route('users.index') }}" :active="request()->routeIs('users.*')" icon="user-cog">
             Manajemen User
         </x-nav-link-custom>
         @endif
 
-        @if(Auth::user()->role === 'operator')
-        <x-nav-link-custom href="{{ route('penduduk.index') }}" :active="request()->routeIs('penduduk.*')" icon="users">
-            Data Penduduk
-        </x-nav-link-custom>
-        @endif
+
 
         <div class="pt-4 pb-2 border-b border-premium-border/10">
             <span class="text-[10px] font-bold text-premium-amber-light/60 uppercase tracking-[0.2em]">Proses SPK</span>

@@ -3,17 +3,50 @@
         <div class="flex justify-between items-center py-2">
             <div>
                 <h2 class="font-serif font-bold text-2xl text-forest leading-tight">
-                    Penilaian & Hasil SPK
+                    @if(Auth::user()->role === 'admin')
+                        Verifikasi Usulan RTLH
+                    @elseif(Auth::user()->role === 'camat')
+                        Validasi & Perankingan
+                    @else
+                        Penilaian & Hasil SPK
+                    @endif
                 </h2>
                 <p class="text-xs text-forest/40 font-bold tracking-widest uppercase mt-1">
-                    Rekap Lengkap · Fuzzy Mamdani · Centroid COA
+                    @if(Auth::user()->role === 'admin')
+                        Review Kelayakan Data · Verifikasi Kecamatan
+                    @elseif(Auth::user()->role === 'camat')
+                        Pengesahan Akhir · Penentuan Penerima Bantuan
+                    @else
+                        Rekap Lengkap · Fuzzy Mamdani · Centroid COA
+                    @endif
                 </p>
             </div>
-
         </div>
     </x-slot>
 
     <div class="space-y-8 pb-12">
+
+        @if(auth()->user()->role === 'admin')
+        <div class="bg-amber-50 border border-amber-200 rounded-[2rem] p-6 flex items-center shadow-sm">
+            <div class="w-12 h-12 bg-amber-100 rounded-2xl flex items-center justify-center text-amber-600 mr-5 shrink-0 shadow-inner">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" /></svg>
+            </div>
+            <div>
+                <p class="text-xs font-black text-amber-800 uppercase tracking-[0.2em] mb-1">Status: Menunggu Verifikasi</p>
+                <p class="text-sm text-amber-700/80 font-medium leading-relaxed">Berikut adalah daftar usulan dari operator kelurahan yang perlu diverifikasi. Tekan tombol <span class="font-bold text-emerald-600 italic">Verifikasi</span> untuk menyetujui atau <span class="font-bold text-red-600 italic">Kembalikan</span> jika data belum sesuai atau perlu revisi.</p>
+            </div>
+        </div>
+        @elseif(auth()->user()->role === 'camat')
+        <div class="bg-forest/5 border border-forest/10 rounded-[2rem] p-6 flex items-center shadow-sm">
+            <div class="w-12 h-12 bg-forest/10 rounded-2xl flex items-center justify-center text-forest mr-5 shrink-0 shadow-inner">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" /></svg>
+            </div>
+            <div>
+                <p class="text-xs font-black text-forest uppercase tracking-[0.2em] mb-1">Status: Siap Validasi</p>
+                <p class="text-sm text-forest/70 font-medium leading-relaxed">Data perankingan telah siap. Silahkan tinjau hasil penilaian Fuzzy Mamdani dan lakukan <span class="font-bold text-forest italic uppercase">Pengesahan (Validasi)</span> untuk menetapkan penerima bantuan.</p>
+            </div>
+        </div>
+        @endif
 
         {{-- =============================================
              STATS: Rata-rata Skor per Kelurahan
@@ -54,6 +87,45 @@
             </div>
         </div>
         @endif
+        @if(auth()->user()->role !== 'operator')
+        <div class="flex flex-col space-y-4">
+            <h3 class="text-[10px] font-black text-forest/40 uppercase tracking-[0.2em]">Filter Status Alur Kerja</h3>
+            <div class="flex flex-wrap gap-2">
+                @php
+                    $currentStatus = request('status');
+                    $availableStatuses = [];
+                    if(auth()->user()->role === 'admin') {
+                        $availableStatuses = [
+                            'dikirim' => ['label' => 'Menunggu Verifikasi', 'icon' => 'clock', 'color' => 'amber'],
+                            'dikembalikan' => ['label' => 'Perlu Revisi', 'icon' => 'refresh', 'color' => 'red'],
+                            'terverifikasi' => ['label' => 'Terverifikasi', 'icon' => 'check-circle', 'color' => 'emerald'],
+                            'valid' => ['label' => 'Disahkan (Valid)', 'icon' => 'award', 'color' => 'forest'],
+                        ];
+                    } elseif(auth()->user()->role === 'camat') {
+                        $availableStatuses = [
+                            'terverifikasi' => ['label' => 'Menunggu Validasi', 'icon' => 'check-circle', 'color' => 'emerald'],
+                            'valid' => ['label' => 'Disahkan (Valid)', 'icon' => 'award', 'color' => 'forest'],
+                        ];
+                    }
+                @endphp
+
+                <a href="{{ route('penilaian.index') }}" 
+                   class="px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all duration-300 border {{ !$currentStatus ? 'bg-forest text-cream border-forest shadow-lg shadow-forest/20' : 'bg-white text-forest/40 border-premium-border hover:border-forest/30 hover:text-forest' }}">
+                   Semua Data
+                </a>
+
+                @foreach($availableStatuses as $statusKey => $cfg)
+                    <a href="{{ route('penilaian.index', ['status' => $statusKey]) }}" 
+                       class="px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all duration-300 border flex items-center {{ $currentStatus === $statusKey ? 'bg-forest text-cream border-forest shadow-lg shadow-forest/20' : 'bg-white text-forest/40 border-premium-border hover:border-forest/30 hover:text-forest' }}">
+                       <span class="mr-2">{{ $cfg['label'] }}</span>
+                       @if($currentStatus === $statusKey)
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                       @endif
+                    </a>
+                @endforeach
+            </div>
+        </div>
+        @endif
 
         {{-- =============================================
              TABEL DETAIL LENGKAP
@@ -67,11 +139,20 @@
                         </svg>
                     </div>
                     <div>
-                        <h3 class="font-serif font-bold text-forest text-sm">Rekap Detail Seluruh Penilaian</h3>
+                        <h3 class="font-serif font-bold text-forest text-sm">
+                            @if(Auth::user()->role === 'admin')
+                                @if($currentStatus === 'dikirim') Antrian Verifikasi Usulan @else Daftar Penilaian Kecamatan @endif
+                            @elseif(Auth::user()->role === 'camat')
+                                @if($currentStatus === 'terverifikasi') Antrian Validasi & Perankingan @else Arsip Validasi @endif
+                            @else
+                                Rekap Detail Seluruh Penilaian
+                            @endif
+                        </h3>
                         <p class="text-[10px] text-forest/40 uppercase tracking-widest font-bold">{{ $penilaian->total() }} Data Tercatat</p>
                     </div>
                 </div>
-                <div class="flex items-center space-x-4">
+            </div>
+            <div class="flex items-center space-x-4">
                     <div class="text-[10px] text-forest/40 italic hidden md:block">← geser →</div>
 
                     <form action="{{ route('penilaian.hitung-massal') }}" method="POST" onsubmit="return confirm('Sistem akan memproses ulang seluruh data rumah penduduk menggunakan aturan fuzzy 81 rules. Lanjutkan?')">
@@ -114,6 +195,10 @@
                                 Hasil Mamdani
                             </th>
                             @endif
+                            {{-- Status --}}
+                            <th rowspan="2" class="px-4 py-3 text-center font-black uppercase tracking-widest text-[9px] text-forest/50 border-r border-premium-border/20">
+                                Status Verifikasi
+                            </th>
                             {{-- Aksi --}}
                             <th rowspan="2" class="px-4 py-3 text-center font-black uppercase tracking-widest text-[9px] text-forest/50 sticky right-0 bg-paper/90 z-10 min-w-[120px] border-l border-premium-border/20">
                                 Aksi
@@ -174,7 +259,9 @@
                                         {{ substr($p->penduduk->nama_lengkap, 0, 1) }}
                                     </div>
                                     <div>
-                                        <p class="font-bold text-forest leading-tight">{{ $p->penduduk->nama_lengkap }}</p>
+                                        <a href="{{ route('penduduk.show', $p->penduduk) }}" class="font-bold text-forest leading-tight hover:text-amber transition-colors">
+                                            {{ $p->penduduk->nama_lengkap }}
+                                        </a>
                                         <p class="text-[9px] text-forest/40 font-bold tracking-widest uppercase">{{ $p->penduduk->kelurahan->nama ?? '-' }}</p>
                                         <p class="text-[9px] text-forest/30 font-mono">{{ $p->periode }}</p>
                                     </div>
@@ -287,6 +374,32 @@
                                 @endif
                             </td>
                             @endif
+                            
+                            {{-- Status Verifikasi --}}
+                            <td class="px-3 py-3 text-center border-r border-premium-border/10">
+                                @php
+                                    $statusConfig = [
+                                        'draft' => ['label' => 'Belum Dikirim', 'color' => 'bg-blue-50 text-blue-500 border-blue-200'],
+                                        'dikirim' => ['label' => 'Menunggu Verifikasi', 'color' => 'bg-blue-600 text-white border-blue-600 shadow-sm shadow-blue-200'],
+                                        'dikembalikan' => ['label' => 'Perlu Revisi', 'color' => 'bg-red-600 text-white border-red-600 shadow-sm shadow-red-200'],
+                                        'terverifikasi' => ['label' => 'Terverifikasi', 'color' => 'bg-emerald-100 text-emerald-700 border-emerald-200'],
+                                        'valid' => ['label' => 'VALID', 'color' => 'bg-forest text-cream border-forest shadow-lg shadow-forest/10'],
+                                    ];
+                                    $cfg = $statusConfig[$p->verifikasi_status] ?? ['label' => strtoupper($p->verifikasi_status), 'color' => 'bg-gray-100 text-gray-500 border-gray-200'];
+                                @endphp
+                                <div class="flex flex-col items-center gap-1">
+                                    <span class="px-2 py-1 rounded-lg text-[8px] font-black tracking-widest uppercase border {{ $cfg['color'] }}">
+                                        {{ $cfg['label'] }}
+                                    </span>
+                                    @if($p->verifikasi_status === 'dikembalikan' && $p->catatan_revisi)
+                                        <button type="button" 
+                                                onclick="alert('Catatan Revisi: {{ str_replace("'", "\'", $p->catatan_revisi) }}')"
+                                                class="text-[8px] text-red-500 hover:underline font-bold">
+                                            Lihat Catatan
+                                        </button>
+                                    @endif
+                                </div>
+                            </td>
 
                             {{-- Tombol Aksi --}}
                             <td class="px-3 py-3 sticky right-0 bg-white/95 border-l border-premium-border/20 z-10">
@@ -299,33 +412,67 @@
                                         Detail
                                     </a>
 
-                                    @if($rumah)
-                                    {{-- Edit Rumah --}}
-                                    <a href="{{ route('rumah.edit', $rumah) }}"
-                                       title="Edit Data Rumah"
-                                       class="w-full flex items-center justify-center gap-1.5 px-2 py-1.5 rounded-lg bg-amber-50 hover:bg-amber-500 text-amber-600 hover:text-white text-[9px] font-black uppercase tracking-widest transition-all duration-200">
-                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
-                                        Rumah
-                                    </a>
+                                    {{-- ACTION BUTTONS BY ROLE & STATUS --}}
+                                    
+                                    @if(Auth::user()->role === 'operator')
+                                        {{-- Operator Actions --}}
+                                        @if(in_array($p->verifikasi_status, ['draft', 'dikembalikan']))
+                                            <form action="{{ route('penilaian.kirim', $p) }}" method="POST" class="w-full">
+                                                @csrf
+                                                <button type="submit" class="w-full flex items-center justify-center gap-1.5 px-2 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-[9px] font-black uppercase tracking-widest transition-all duration-200">
+                                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
+                                                    {{ $p->verifikasi_status === 'dikembalikan' ? 'Kirim Ulang' : 'Kirim' }}
+                                                </button>
+                                            </form>
+                                        @endif
+                                    @endif
 
-                                    {{-- Recalculate --}}
-                                    <form action="{{ route('rumah.recalculate', $rumah) }}" method="POST" class="w-full">
-                                        @csrf
-                                        <button type="submit"
-                                                title="Hitung Ulang Fuzzy Mamdani"
-                                                class="w-full flex items-center justify-center gap-1.5 px-2 py-1.5 rounded-lg bg-forest/5 hover:bg-forest text-forest/60 hover:text-cream text-[9px] font-black uppercase tracking-widest transition-all duration-200 group">
-                                            <svg class="w-3 h-3 group-hover:rotate-180 transition-transform duration-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-                                            Hitung
-                                        </button>
-                                    </form>
-                                    @else
-                                    {{-- Input Rumah --}}
-                                    <a href="{{ route('rumah.create', ['penduduk_id' => $p->penduduk->id]) }}"
-                                       title="Input Data Rumah"
-                                       class="w-full flex items-center justify-center gap-1.5 px-2 py-1.5 rounded-lg bg-red-50 hover:bg-red-500 text-red-500 hover:text-white text-[9px] font-black uppercase tracking-widest transition-all duration-200">
-                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                                        Input Rumah
-                                    </a>
+                                    @if(Auth::user()->role === 'admin' || Auth::user()->role === 'camat') {{-- Assuming Admin role for Admin Camat --}}
+                                        {{-- Admin Camat Actions --}}
+                                        @if($p->verifikasi_status === 'dikirim')
+                                            <div class="flex flex-col gap-1 w-full">
+                                                <form action="{{ route('penilaian.verifikasi', $p) }}" method="POST" class="w-full">
+                                                    @csrf
+                                                    <input type="hidden" name="status" value="terverifikasi">
+                                                    <button type="submit" class="w-full flex items-center justify-center gap-1.5 px-2 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-[9px] font-black uppercase tracking-widest transition-all duration-200">
+                                                        Verifikasi
+                                                    </button>
+                                                </form>
+                                                <button type="button" 
+                                                        onclick="const catatan = prompt('Masukkan alasan pengembalian:'); if(catatan) { document.getElementById('form-kembalikan-{{ $p->id }}').catatan.value = catatan; document.getElementById('form-kembalikan-{{ $p->id }}').submit(); }"
+                                                        class="w-full flex items-center justify-center gap-1.5 px-2 py-1.5 rounded-lg bg-red-100 hover:bg-red-200 text-red-700 text-[9px] font-black uppercase tracking-widest transition-all duration-200">
+                                                    Kembalikan
+                                                </button>
+                                                <form id="form-kembalikan-{{ $p->id }}" action="{{ route('penilaian.verifikasi', $p) }}" method="POST" class="hidden">
+                                                    @csrf
+                                                    <input type="hidden" name="status" value="dikembalikan">
+                                                    <input type="hidden" name="catatan" value="">
+                                                </form>
+                                            </div>
+                                        @endif
+                                    @endif
+
+                                    @if(Auth::user()->role === 'camat')
+                                        {{-- Camat Actions --}}
+                                        @if($p->verifikasi_status === 'terverifikasi')
+                                            <form action="{{ route('penilaian.validasi', $p) }}" method="POST" class="w-full">
+                                                @csrf
+                                                <button type="submit" class="w-full flex items-center justify-center gap-1.5 px-2 py-1.5 rounded-lg bg-forest text-cream text-[9px] font-black uppercase tracking-widest transition-all duration-200 shadow-md">
+                                                    VALIDASI
+                                                </button>
+                                            </form>
+                                        @endif
+                                    @endif
+
+                                    {{-- PROTECTED ACTIONS (EDIT/DELETE) --}}
+                                    @if(in_array($p->verifikasi_status, ['draft', 'dikembalikan']))
+                                        @if($rumah)
+                                            <a href="{{ route('rumah.edit', $rumah) }}"
+                                               title="Edit Data Rumah"
+                                               class="w-full flex items-center justify-center gap-1.5 px-2 py-1.5 rounded-lg bg-amber-50 hover:bg-amber-500 text-amber-600 hover:text-white text-[9px] font-black uppercase tracking-widest transition-all duration-200">
+                                                Edit
+                                            </a>
+                                        @endif
                                     @endif
                                 </div>
                             </td>

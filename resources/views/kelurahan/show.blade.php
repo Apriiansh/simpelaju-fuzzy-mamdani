@@ -79,12 +79,14 @@
                     <div class="bg-forest/[0.02] backdrop-blur-sm rounded-3xl shadow-sm border border-premium-border/30 overflow-hidden">
                         <div class="px-8 py-6 border-b border-premium-border/30 flex items-center justify-between bg-white/40">
                             <h3 class="font-serif text-xl font-bold text-forest">Daftar Penduduk</h3>
+                            @if(auth()->user()->role === 'operator')
                             <a href="{{ route('penduduk.create', ['kelurahan_id' => $kelurahan->id]) }}" class="text-sm font-bold text-forest hover:text-amber transition-colors duration-300 flex items-center">
                                 <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                                 </svg>
                                 Tambah Penduduk
                             </a>
+                            @endif
                         </div>
                         
                         <div class="overflow-x-auto">

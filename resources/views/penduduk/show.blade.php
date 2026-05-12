@@ -33,10 +33,12 @@
                         <a href="{{ route('penduduk.index') }}" class="text-forest/60 hover:text-forest bg-white/50 border border-premium-border/50 px-4 py-2 rounded-xl transition-all duration-300 font-bold text-[10px] uppercase tracking-widest shadow-sm hover:shadow-md">
                             Kembali
                         </a>
+                        @if(auth()->user()->role === 'operator')
                         <a href="{{ route('penduduk.edit', $penduduk) }}" class="bg-forest text-cream px-4 py-2 rounded-xl shadow-lg shadow-forest/10 text-[10px] font-bold uppercase tracking-widest hover:bg-forest-dark transition-all duration-300 hover:-translate-y-0.5 flex items-center">
                             <svg class="w-3 h-3 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
                             Edit Profil
                         </a>
+                        @endif
                     </div>
                 </div>
                 
@@ -95,10 +97,12 @@
                         <div class="bg-paper/50 px-6 py-3 border-b border-premium-border/30 flex justify-between items-center">
                             <h4 class="font-bold text-xs text-forest uppercase tracking-widest">Detail Kondisi Fisik</h4>
                             <div class="flex items-center space-x-4">
+                                @if(auth()->user()->role === 'operator')
                                 <a href="{{ route('rumah.edit', $penduduk->rumah) }}" class="text-[10px] font-black text-forest/40 hover:text-forest transition-colors uppercase tracking-widest flex items-center">
                                     <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
                                     Edit Data Rumah
                                 </a>
+                                @endif
                                 <span class="px-2 py-0.5 rounded bg-forest text-cream text-[10px] font-bold">{{ $penduduk->rumah->status_kepemilikan }}</span>
                             </div>
                         </div>
@@ -174,10 +178,12 @@
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
                         </div>
                         <p class="text-forest/40 font-serif italic text-sm">Belum ada rincian data kondisi rumah fisik.</p>
+                        @if(auth()->user()->role === 'operator')
                         <a href="{{ route('rumah.create', ['penduduk_id' => $penduduk->id]) }}" class="inline-flex items-center mt-4 text-forest font-bold text-xs uppercase tracking-widest hover:text-premium-amber transition-colors">
                             Input Data Sekarang
                             <svg class="w-3 h-3 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
                         </a>
+                        @endif
                     </div>
                 @endif
             </div>
@@ -189,7 +195,7 @@
                 <div class="flex justify-between items-center mb-6 border-b border-premium-border/30 pb-4">
                     <h3 class="text-lg font-serif font-bold text-forest flex items-center">
                         <svg class="w-5 h-5 mr-3 text-premium-amber" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
-                        Hasil SPK Mamdani
+                        Status SPK
                     </h3>
                     
                     @if($penduduk->rumah)
@@ -204,44 +210,76 @@
                 
                 @if($penduduk->penilaian->isNotEmpty())
                     @php $latest = $penduduk->penilaian->last(); @endphp
-                    @if($latest->hasilSPK)
-                        @if(Auth::user()->role !== 'operator')
-                        <div class="text-center p-8 rounded-2xl {{ $latest->hasilSPK->kategori_kelayakan == 'LAYAK' ? 'bg-forest text-cream shadow-xl shadow-forest/20' : 'bg-red-50 text-red-800' }} border {{ $latest->hasilSPK->kategori_kelayakan == 'LAYAK' ? 'border-forest' : 'border-red-100' }}">
-                            <div class="text-4xl font-serif font-extrabold mb-1">
-                                {{ $latest->hasilSPK->kategori_kelayakan }}
+                    
+                    @if(Auth::user()->role !== 'operator')
+                        {{-- VIEW UNTUK ADMIN/CAMAT --}}
+                        @if($latest->hasilSPK)
+                            <div class="text-center p-8 rounded-2xl {{ $latest->hasilSPK->kategori_kelayakan == 'LAYAK' ? 'bg-forest text-cream shadow-xl shadow-forest/20' : 'bg-red-50 text-red-800' }} border {{ $latest->hasilSPK->kategori_kelayakan == 'LAYAK' ? 'border-forest' : 'border-red-100' }}">
+                                <div class="text-4xl font-serif font-extrabold mb-1">
+                                    {{ $latest->hasilSPK->kategori_kelayakan }}
+                                </div>
+                                <div class="w-12 h-0.5 {{ $latest->hasilSPK->kategori_kelayakan == 'LAYAK' ? 'bg-premium-amber' : 'bg-red-300' }} mx-auto mb-4"></div>
+                                <p class="text-xs uppercase font-bold tracking-[0.2em] {{ $latest->hasilSPK->kategori_kelayakan == 'LAYAK' ? 'text-cream/60' : 'text-red-400' }}">
+                                    Skor: {{ number_format($latest->hasilSPK->nilai_defuzzifikasi, 3) }}
+                                </p>
+                                <div class="mt-6 pt-6 border-t {{ $latest->hasilSPK->kategori_kelayakan == 'LAYAK' ? 'border-cream/10' : 'border-red-100' }} text-[10px] font-medium opacity-60 uppercase tracking-widest">
+                                    Status: <span class="font-black">{{ strtoupper($latest->verifikasi_status) }}</span>
+                                </div>
                             </div>
-                            <div class="w-12 h-0.5 {{ $latest->hasilSPK->kategori_kelayakan == 'LAYAK' ? 'bg-premium-amber' : 'bg-red-300' }} mx-auto mb-4"></div>
-                            <p class="text-xs uppercase font-bold tracking-[0.2em] {{ $latest->hasilSPK->kategori_kelayakan == 'LAYAK' ? 'text-cream/60' : 'text-red-400' }}">
-                                Skor: {{ number_format($latest->hasilSPK->nilai_defuzzifikasi, 3) }}
-                            </p>
-                            <div class="mt-6 pt-6 border-t {{ $latest->hasilSPK->kategori_kelayakan == 'LAYAK' ? 'border-cream/10' : 'border-red-100' }} text-[10px] font-medium opacity-60 uppercase tracking-widest">
-                                Periode: {{ $latest->periode }}
-                            </div>
-                        </div>
                         @else
-                        <div class="text-center p-8 rounded-2xl bg-paper/50 border border-premium-border/50">
-                            <div class="text-2xl font-serif font-bold text-forest/60 mb-2">
-                                <svg class="w-6 h-6 mx-auto mb-2 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                            <div class="text-center p-8 bg-paper/50 rounded-2xl border border-premium-border/50">
+                                <svg class="animate-spin h-8 w-8 text-premium-amber mx-auto mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                 </svg>
-                                Data Sedang Diproses
+                                <span class="text-forest/70 font-bold text-xs uppercase tracking-widest">Menunggu Verifikasi</span>
                             </div>
-                            <p class="text-sm text-forest/50 font-medium">
-                                Data Anda sedang dalam proses verifikasi oleh Kecamatan
-                            </p>
-                            <div class="mt-4 pt-4 border-t border-premium-border/30 text-[10px] font-medium text-forest/40 uppercase tracking-widest">
-                                Periode: {{ $latest->periode }}
-                            </div>
-                        </div>
                         @endif
                     @else
-                        <div class="text-center p-8 bg-paper/50 rounded-2xl border border-premium-border/50">
-                            <svg class="animate-spin h-8 w-8 text-premium-amber mx-auto mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                            </svg>
-                            <span class="text-forest/70 font-bold text-xs uppercase tracking-widest">Kalkulasi Sedang Berjalan</span>
-                        </div>
+                        {{-- VIEW UNTUK OPERATOR LURAH --}}
+                        @if($latest->verifikasi_status === 'valid' || $latest->verifikasi_status === 'terverifikasi')
+                            @if($latest->hasilSPK)
+                                <div class="text-center p-8 rounded-2xl {{ $latest->hasilSPK->kategori_kelayakan == 'LAYAK' ? 'bg-forest text-cream shadow-xl shadow-forest/20' : 'bg-red-50 text-red-800' }} border {{ $latest->hasilSPK->kategori_kelayakan == 'LAYAK' ? 'border-forest' : 'border-red-100' }}">
+                                    <div class="text-2xl font-serif font-bold mb-1">
+                                        {{ $latest->hasilSPK->kategori_kelayakan }}
+                                    </div>
+                                    <p class="text-[10px] font-bold uppercase tracking-widest mb-4 opacity-70">
+                                        {{ $latest->verifikasi_status === 'valid' ? 'Hasil Final / Disahkan' : 'Sudah Terverifikasi' }}
+                                    </p>
+                                    <div class="pt-4 border-t border-current opacity-20 text-[10px]">
+                                        Skor: {{ number_format($latest->hasilSPK->nilai_defuzzifikasi, 2) }}
+                                    </div>
+                                </div>
+                            @else
+                                <div class="text-center p-8 rounded-2xl bg-paper/50 border border-premium-border/50">
+                                    <p class="text-sm text-forest/50 font-medium">Data sedang diproses oleh sistem.</p>
+                                </div>
+                            @endif
+                        @elseif($latest->verifikasi_status === 'dikirim')
+                            <div class="text-center p-8 rounded-2xl bg-paper/50 border border-premium-border/50">
+                                <div class="text-2xl font-serif font-bold text-forest/60 mb-2">
+                                    <svg class="w-6 h-6 mx-auto mb-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                    </svg>
+                                    Usulan Terkirim
+                                </div>
+                                <p class="text-sm text-forest/50 font-medium">Menunggu verifikasi Admin Kecamatan.</p>
+                            </div>
+                        @elseif($latest->verifikasi_status === 'dikembalikan')
+                            <div class="text-center p-8 rounded-2xl bg-red-50 border border-red-200">
+                                <div class="text-xl font-serif font-bold text-red-700 mb-2">Perlu Revisi</div>
+                                <p class="text-xs text-red-600 font-medium mb-4">{{ $latest->catatan_revisi ?? 'Data dikembalikan untuk diperbaiki.' }}</p>
+                                <a href="{{ route('rumah.edit', $penduduk->rumah) }}" class="inline-block bg-red-600 text-white px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest">Perbaiki Data</a>
+                            </div>
+                        @else
+                            <div class="text-center p-8 rounded-2xl bg-slate-50 border border-slate-200">
+                                <p class="text-sm text-slate-500 font-medium mb-4">Data belum dikirim ke Kecamatan.</p>
+                                <form action="{{ route('penilaian.kirim', $latest) }}" method="POST">
+                                    @csrf
+                                    <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest">Kirim Usulan</button>
+                                </form>
+                            </div>
+                        @endif
                     @endif
                 @else
                     <div class="text-center p-10 bg-paper/20 rounded-2xl border-2 border-dashed border-premium-border/50">

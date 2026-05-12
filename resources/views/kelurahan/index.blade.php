@@ -26,7 +26,7 @@
                         <th class="px-10 py-6">Nama Wilayah</th>
                         <th class="px-10 py-6 text-center">Kode Arsip</th>
                         <th class="px-10 py-6 text-center">Densitas Penduduk</th>
-                        <th class="px-10 py-6 text-right">Opsi Operasi</th>
+                        <th class="px-10 py-6 text-right">Opsi</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-premium-border/10">

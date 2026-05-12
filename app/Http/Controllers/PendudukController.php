@@ -14,10 +14,33 @@ class PendudukController extends Controller
     public function index()
     {
         $user = auth()->user();
-        $query = Penduduk::with('kelurahan');
+        $query = Penduduk::with(['kelurahan', 'rumah', 'penilaian']);
+
+        $statusFilter = $request->query('status');
 
         if ($user->role === 'operator') {
             $query->where('kelurahan_id', $user->kelurahan_id);
+            if ($statusFilter) {
+                $query->whereHas('penilaian', function($q) use ($statusFilter) {
+                    $q->where('verifikasi_status', $statusFilter);
+                });
+            }
+        } elseif ($user->role === 'admin') {
+            // Admin can see everything that has been submitted at least once
+            $query->whereHas('penilaian', function($q) use ($statusFilter) {
+                $q->where('verifikasi_status', '!=', 'draft');
+                if ($statusFilter) {
+                    $q->where('verifikasi_status', $statusFilter);
+                }
+            });
+        } elseif ($user->role === 'camat') {
+            // Camat can see verified and valid data
+            $query->whereHas('penilaian', function($q) use ($statusFilter) {
+                $q->whereIn('verifikasi_status', ['terverifikasi', 'valid']);
+                if ($statusFilter) {
+                    $q->where('verifikasi_status', $statusFilter);
+                }
+            });
         }
 
         $penduduk = $query->latest()->paginate(10);
