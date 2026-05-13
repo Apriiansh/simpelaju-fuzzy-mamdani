@@ -196,6 +196,70 @@
                 </div>
             </div>
 
+            {{-- Filter Bar --}}
+            <div class="px-6 py-4 bg-paper/50 border-b border-premium-border/30">
+                <form action="{{ route('penilaian.index') }}" method="GET" class="flex flex-wrap items-end gap-4">
+                    {{-- Preserve existing status filter if any --}}
+                    @if(request('status'))
+                        <input type="hidden" name="status" value="{{ request('status') }}">
+                    @endif
+
+                    {{-- Search --}}
+                    <div class="flex-1 min-w-[200px]">
+                        <label class="block text-[10px] font-black text-forest/40 uppercase tracking-widest mb-1.5 ml-1">Pencarian</label>
+                        <div class="relative">
+                            <input type="text" name="search" value="{{ request('search') }}" 
+                                   placeholder="Cari Nama atau NIK..."
+                                   class="w-full pl-9 pr-4 py-2 bg-white border border-premium-border/50 rounded-xl text-xs focus:ring-2 focus:ring-premium-amber/20 focus:border-premium-amber transition-all">
+                            <svg class="w-4 h-4 absolute left-3 top-2.5 text-forest/30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                            </svg>
+                        </div>
+                    </div>
+
+                    {{-- Kelurahan (Admin/Camat only) --}}
+                    @if(Auth::user()->role !== 'operator')
+                    <div class="w-full md:w-48">
+                        <label class="block text-[10px] font-black text-forest/40 uppercase tracking-widest mb-1.5 ml-1">Kelurahan</label>
+                        <select name="kelurahan_id" class="w-full px-3 py-2 bg-white border border-premium-border/50 rounded-xl text-xs focus:ring-2 focus:ring-premium-amber/20 focus:border-premium-amber transition-all">
+                            <option value="">Semua Kelurahan</option>
+                            @foreach($kelurahans as $k)
+                                <option value="{{ $k->id }}" {{ request('kelurahan_id') == $k->id ? 'selected' : '' }}>{{ $k->nama }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    @endif
+
+                    {{-- Status Layak --}}
+                    <div class="w-full md:w-48">
+                        <label class="block text-[10px] font-black text-forest/40 uppercase tracking-widest mb-1.5 ml-1">Status Kelayakan</label>
+                        <select name="layak_status" class="w-full px-3 py-2 bg-white border border-premium-border/50 rounded-xl text-xs focus:ring-2 focus:ring-premium-amber/20 focus:border-premium-amber transition-all">
+                            <option value="">Semua Status</option>
+                            <option value="LAYAK" {{ request('layak_status') === 'LAYAK' ? 'selected' : '' }}>BERHAK (LAYAK)</option>
+                            <option value="TIDAK_LAYAK" {{ request('layak_status') === 'TIDAK_LAYAK' ? 'selected' : '' }}>TIDAK LAYAK</option>
+                        </select>
+                    </div>
+
+                    {{-- Buttons --}}
+                    <div class="flex items-center gap-2">
+                        <button type="submit" class="px-4 py-2 bg-forest text-white rounded-xl text-xs font-bold hover:bg-forest/90 transition-all shadow-sm flex items-center gap-2">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
+                            </svg>
+                            Filter
+                        </button>
+                        @if(request()->anyFilled(['search', 'kelurahan_id', 'layak_status']))
+                        <a href="{{ route('penilaian.index', request()->only('status')) }}" class="px-4 py-2 bg-forest/5 text-forest rounded-xl text-xs font-bold hover:bg-forest/10 transition-all flex items-center gap-2">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                            Reset
+                        </a>
+                        @endif
+                    </div>
+                </form>
+            </div>
+
             {{-- ========================================================== --}}
             {{-- MODE TABLE                                                  --}}
             {{-- ========================================================== --}}

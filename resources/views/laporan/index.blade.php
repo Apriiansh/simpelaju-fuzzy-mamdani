@@ -2,10 +2,10 @@
     <x-slot name="header">
         <div class="py-2">
             <h2 class="font-serif font-bold text-2xl text-forest leading-tight">
-                Laporan Cetak & Prioritas
+                Laporan Hasil Penilaian RTLH
             </h2>
             <p class="text-xs text-forest/40 font-bold tracking-widest uppercase mt-1">
-                Export Daftar Prioritas Penerima Bantuan RTLH (Format Resmi)
+                Export Hasil Penilaian dan Rekomendasi Bantuan RTLH (Format Resmi)
             </p>
         </div>
     </x-slot>
@@ -75,11 +75,11 @@
                     </div>
 
                     @if($laporan->total() > 0)
-                    <button type="button" 
+                    <button type="button"
                             onclick="window.open('{{ route('laporan.cetak', request()->all()) }}', '_blank')"
-                            class="flex items-center gap-2 px-6 py-2.5 bg-premium-amber text-forest rounded-xl text-sm font-black uppercase tracking-widest shadow-lg shadow-premium-amber/20 hover:bg-amber-500 transition-all hover:-translate-y-0.5">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
-                        Cetak PDF
+                            class="flex items-center gap-2 px-6 py-2.5 bg-emerald-600 text-white rounded-xl text-sm font-black uppercase tracking-widest shadow-lg shadow-emerald-600/20 hover:bg-emerald-700 transition-all hover:-translate-y-0.5">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                        Export Excel
                     </button>
                     @endif
                 </div>
@@ -149,7 +149,7 @@
                         <tr>
                             <td colspan="5" class="px-6 py-12 text-center text-forest/40">
                                 <svg class="w-12 h-12 mx-auto mb-3 opacity-20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path></svg>
-                                <p class="text-sm font-bold uppercase tracking-widest mb-1">Belum ada data prioritas yang valid</p>
+                                <p class="text-sm font-bold uppercase tracking-widest mb-1">Belum ada data penilaian yang valid</p>
                                 <p class="text-[10px] uppercase tracking-[0.2em] opacity-60">Pastikan Camat telah melakukan validasi pada menu penilaian</p>
                             </td>
                         </tr>

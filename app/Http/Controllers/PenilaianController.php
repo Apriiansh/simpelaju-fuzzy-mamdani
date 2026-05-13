@@ -35,29 +35,49 @@ class PenilaianController extends Controller
             ]);
 
         $statusFilter = $request->query('status');
+        $search = $request->query('search');
+        $kelurahanId = $request->query('kelurahan_id');
+        $layakStatus = $request->query('layak_status');
 
+        // Base Role-based filters
         if ($user->role === 'operator') {
             $query->whereHas('penduduk', function($q) use ($user) {
                 $q->where('kelurahan_id', $user->kelurahan_id);
             });
-            if ($statusFilter) {
-                $query->where('verifikasi_status', $statusFilter);
-            }
         } elseif ($user->role === 'admin') {
-            // Admin can see everything except draft
             $query->where('verifikasi_status', '!=', 'draft');
-            if ($statusFilter) {
-                $query->where('verifikasi_status', $statusFilter);
-            }
         } elseif ($user->role === 'camat') {
-            // Camat can see verified and valid
             $query->whereIn('verifikasi_status', ['terverifikasi', 'valid']);
-            if ($statusFilter) {
-                $query->where('verifikasi_status', $statusFilter);
-            }
         }
 
-        $penilaian = $query->latest()->paginate(20);
+        // Additional Filters
+        if ($statusFilter) {
+            $query->where('verifikasi_status', $statusFilter);
+        }
+
+        if ($search) {
+            $query->whereHas('penduduk', function($q) use ($search) {
+                $q->where(DB::raw('LOWER(nama_lengkap)'), 'like', '%' . strtolower($search) . '%')
+                  ->orWhere('nik', 'like', "%{$search}%");
+            });
+        }
+
+        if ($kelurahanId && $user->role !== 'operator') {
+            $query->whereHas('penduduk', function($q) use ($kelurahanId) {
+                $q->where('kelurahan_id', $kelurahanId);
+            });
+        }
+
+        if ($layakStatus) {
+            $query->whereHas('hasilSPK', function($q) use ($layakStatus) {
+                $q->where('kategori_kelayakan', $layakStatus);
+            });
+        }
+
+        $penilaian = $query->latest()->paginate(20)->withQueryString();
+
+        // Get Kelurahans for filter (Admin/Camat only)
+        $kelurahans = ($user->role !== 'operator') ? \App\Models\Kelurahan::orderBy('nama')->get() : collect();
 
         // Compute average crisp score per kelurahan for stats cards
         $statsQuery = \App\Models\HasilSpk::join('penilaian', 'hasil_spk.penilaian_id', '=', 'penilaian.id')
@@ -78,7 +98,7 @@ class PenilaianController extends Controller
             ->orderByDesc('rata_skor')
             ->get();
 
-        return view('penilaian.index', compact('penilaian', 'statsPerKelurahan'));
+        return view('penilaian.index', compact('penilaian', 'statsPerKelurahan', 'kelurahans'));
     }
 
     /**
