@@ -201,7 +201,7 @@
                                         <div>
                                             <x-input-label for="kondisi_atap" :value="__('Kondisi Atap')" />
                                             <select name="kondisi_atap" class="mt-1 w-full border-amber-200 rounded-xl text-sm bg-amber-50/10">
-                                                <option value="Baik">Baik (Tidak Bocor)</option>
+                                                <option value="Rusak Ringan">Rusak Ringan (Retak kecil, masih layak)</option>
                                                 <option value="Rusak Sedang / Sebagian">Rusak Sedang (Bocor Sebagian)</option>
                                                 <option value="Rusak Berat / Seluruhnya">Rusak Berat (Bocor Parah)</option>
                                             </select>
@@ -209,7 +209,7 @@
                                         <div>
                                             <x-input-label for="kondisi_dinding" :value="__('Kondisi Dinding')" />
                                             <select name="kondisi_dinding" class="mt-1 w-full border-amber-200 rounded-xl text-sm bg-amber-50/10">
-                                                <option value="Baik">Baik (Kokoh)</option>
+                                                <option value="Rusak Ringan">Rusak Ringan (Retak kecil, masih layak)</option>
                                                 <option value="Rusak Sedang / Sebagian">Rusak Sedang (Retak/Lapuk)</option>
                                                 <option value="Rusak Berat / Seluruhnya">Rusak Berat (Miring/Roboh)</option>
                                             </select>
@@ -219,7 +219,7 @@
                                         <div>
                                             <x-input-label for="kondisi_lantai" :value="__('Kondisi Lantai')" />
                                             <select name="kondisi_lantai" class="mt-1 w-full border-amber-200 rounded-xl text-sm bg-amber-50/10">
-                                                <option value="Baik">Baik (Rata/Bersih)</option>
+                                                <option value="Rusak Ringan">Rusak Ringan (Retak kecil, masih layak)</option>
                                                 <option value="Rusak Sedang / Sebagian">Rusak Sedang (Pecah/Lembab)</option>
                                                 <option value="Rusak Berat / Seluruhnya">Rusak Berat (Hancur/Berlubang)</option>
                                             </select>

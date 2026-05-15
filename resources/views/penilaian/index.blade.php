@@ -621,7 +621,15 @@
                                 </div>
                                 <div class="flex justify-between items-center">
                                     <span class="text-[9px] text-forest/50">Mat. Lantai</span>
-                                    <span class="text-[9px] font-bold text-amber-600">{{ Str::limit($rumah->material_lantai, 12) }}</span>
+                                    <span class="text-[9px] font-bold text-amber-600">{{ $rumah->material_lantai }}</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-[9px] text-forest/50">Mat. Dinding</span>
+                                    <span class="text-[9px] font-bold text-amber-600">{{ $rumah->material_dinding }}</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-[9px] text-forest/50">Mat. Atap</span>
+                                    <span class="text-[9px] font-bold text-amber-600">{{ $rumah->material_atap  }}</span>
                                 </div>
                                 @if($skorD && Auth::user()->role !== 'operator')
                                 <div class="pt-1 border-t border-amber-100 mt-1 flex justify-between items-center">

@@ -176,6 +176,10 @@
                                         <span class="text-slate-400">Dinding:</span>
                                         <span class="font-bold text-forest">{{ $penduduk->rumah->material_dinding }}</span>
                                     </div>
+                                    <div class="flex justify-between text-[10px]">
+                                        <span class="text-slate-400">Lantai:</span>
+                                        <span class="font-bold text-forest">{{ $penduduk->rumah->material_lantai }}</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>

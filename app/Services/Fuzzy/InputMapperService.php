@@ -49,8 +49,7 @@ class InputMapperService
     private function mapQualitative($value)
     {
         $v = strtolower($value);
-        if (str_contains($v, 'baik')) return 1.0;
-        if (str_contains($v, 'ringan')) return 0.75;
+        if (str_contains($v, 'baik') || str_contains($v, 'ringan')) return 1.0;
         if (str_contains($v, 'sedang') || str_contains($v, 'sebagian')) return 0.5;
         if (str_contains($v, 'berat') || str_contains($v, 'seluruhnya')) return 0.0;
         return 0.5;
@@ -102,88 +101,159 @@ class InputMapperService
     private function calculateDensityValue(Rumah $rumah)
     {
         $rumah->load('penduduk');
-        $numPeople = ($rumah->penduduk->jumlah_tanggungan ?? 0);
-        // Pastikan tidak pembagian dengan nol
+        // Tambahkan +1 untuk menyertakan Kepala Keluarga (KK) sendiri
+        $numPeople = ($rumah->penduduk->jumlah_tanggungan ?? 0) + 1;
+        
         if ($numPeople <= 0) $numPeople = 1;
         return $rumah->luas_bangunan / $numPeople;
     }
 
     private function calculatePilarDScore(Rumah $rumah)
     {
-        $atapQuality = $this->getComponentQuality(
-            $this->getMaterialCategory($rumah->material_atap, 'atap'),
-            $this->getConditionCategory($rumah->kondisi_atap)
-        );
-        $dindingQuality = $this->getComponentQuality(
-            $this->getMaterialCategory($rumah->material_dinding, 'dinding'),
-            $this->getConditionCategory($rumah->kondisi_dinding)
-        );
-        $lantaiQuality = $this->getComponentQuality(
-            $this->getMaterialCategory($rumah->material_lantai, 'lantai'),
-            $this->getConditionCategory($rumah->kondisi_lantai)
-        );
+        // 1. Crisp values for Material and Kondisi
+        $m_a = $this->mapMaterialAtap($rumah->material_atap);
+        $m_d = $this->mapMaterialDinding($rumah->material_dinding);
+        $m_l = $this->mapMaterialLantai($rumah->material_lantai);
 
-        $finalStatus = $this->aggregatePilarD($atapQuality, $lantaiQuality, $dindingQuality);
+        $k_a = $this->mapQualitative($rumah->kondisi_atap);
+        $k_d = $this->mapQualitative($rumah->kondisi_dinding);
+        $k_l = $this->mapQualitative($rumah->kondisi_lantai);
 
-        return match($finalStatus) {
-            'Buruk' => 0.2,
-            'Sedang' => 0.5,
-            'Baik' => 0.8,
-            default => 0.5
-        };
+        // 2. Fuzzify Inputs
+        $f_m_a = $this->fuzzifyMaterial($m_a);
+        $f_m_d = $this->fuzzifyMaterial($m_d);
+        $f_m_l = $this->fuzzifyMaterial($m_l);
+
+        $f_k_a = $this->fuzzifyKondisi($k_a);
+        $f_k_d = $this->fuzzifyKondisi($k_d);
+        $f_k_l = $this->fuzzifyKondisi($k_l);
+
+        // 3. Evaluate Rules for each Component Kualitas
+        $q_a = $this->evaluateKualitasRules($f_m_a, $f_k_a);
+        $q_d = $this->evaluateKualitasRules($f_m_d, $f_k_d);
+        $q_l = $this->evaluateKualitasRules($f_m_l, $f_k_l);
+
+        // 4. Evaluate Rules for Pilar D Aggregation
+        $pilarD = $this->evaluatePilarDRules($q_a, $q_l, $q_d);
+
+        // 5. Kembalikan nilai Alpha tertinggi secara langsung (Max-Membership) agar sama persis dengan PDF
+        return max($pilarD);
     }
 
-    private function getMaterialCategory($v, $type)
+    private function fuzzifyMaterial($x)
     {
-        $score = match($type) {
-            'atap' => $this->mapMaterialAtap($v),
-            'dinding' => $this->mapMaterialDinding($v),
-            'lantai' => $this->mapMaterialLantai($v),
-            default => 0.5
-        };
-        if ($score <= 0.4) return 'Rendah';
-        if ($score <= 0.7) return 'Sedang';
-        return 'Tinggi';
+        return [
+            'Rendah' => $this->calculateMembership($x, [0.0, 0.0, 0.4]),
+            'Sedang' => $this->calculateMembership($x, [0.3, 0.5, 0.7]),
+            'Tinggi' => $this->calculateMembership($x, [0.6, 0.85, 1.0])
+        ];
     }
 
-    private function getConditionCategory($v)
+    private function fuzzifyKondisi($x)
     {
-        $score = $this->mapQualitative($v);
-        if ($score <= 0.4) return 'Buruk';
-        if ($score <= 0.7) return 'Sedang';
-        return 'Baik';
+        return [
+            'Buruk' => $this->calculateMembership($x, [0.0, 0.0, 0.4]),
+            'Sedang' => $this->calculateMembership($x, [0.3, 0.5, 0.7]),
+            'Baik' => $this->calculateMembership($x, [0.6, 0.85, 1.0])
+        ];
     }
 
-    private function getComponentQuality($mat, $cond)
+    private function evaluateKualitasRules($mat, $kon)
     {
-        if ($mat === 'Rendah') {
-            return ($cond === 'Baik') ? 'Sedang' : 'Buruk';
-        }
-        if ($mat === 'Sedang') {
-            if ($cond === 'Buruk') return 'Buruk';
-            if ($cond === 'Sedang') return 'Sedang';
-            return 'Baik';
-        }
-        if ($mat === 'Tinggi') {
-            if ($cond === 'Buruk') return 'Sedang';
-            return 'Baik';
-        }
-        return 'Sedang';
-    }
-
-    private function aggregatePilarD($a, $l, $d)
-    {
-        $burukCount = ($a === 'Buruk' ? 1 : 0) + ($l === 'Buruk' ? 1 : 0) + ($d === 'Buruk' ? 1 : 0);
-        $baikCount = ($a === 'Baik' ? 1 : 0) + ($l === 'Baik' ? 1 : 0) + ($d === 'Baik' ? 1 : 0);
-
-        if ($burukCount >= 1) {
-            // KR1-KR7 logic: Any Buruk with another non-Baik OR multi Buruk = Buruk
-            if ($burukCount >= 2 || $baikCount <= 1) return 'Buruk';
-            return 'Sedang'; // One Buruk but others are Baik (KR23, etc)
-        }
+        $out = ['Buruk' => 0.0, 'Sedang' => 0.0, 'Baik' => 0.0];
         
-        if ($baikCount >= 2) return 'Baik';
-        return 'Sedang';
+        // Rendah x Buruk -> Buruk
+        $out['Buruk'] = max($out['Buruk'], min($mat['Rendah'], $kon['Buruk']));
+        // Rendah x Sedang -> Buruk
+        $out['Buruk'] = max($out['Buruk'], min($mat['Rendah'], $kon['Sedang']));
+        // Rendah x Baik -> Sedang
+        $out['Sedang'] = max($out['Sedang'], min($mat['Rendah'], $kon['Baik']));
+        
+        // Sedang x Buruk -> Buruk
+        $out['Buruk'] = max($out['Buruk'], min($mat['Sedang'], $kon['Buruk']));
+        // Sedang x Sedang -> Sedang
+        $out['Sedang'] = max($out['Sedang'], min($mat['Sedang'], $kon['Sedang']));
+        // Sedang x Baik -> Baik
+        $out['Baik'] = max($out['Baik'], min($mat['Sedang'], $kon['Baik']));
+        
+        // Tinggi x Buruk -> Sedang
+        $out['Sedang'] = max($out['Sedang'], min($mat['Tinggi'], $kon['Buruk']));
+        // Tinggi x Sedang -> Baik
+        $out['Baik'] = max($out['Baik'], min($mat['Tinggi'], $kon['Sedang']));
+        // Tinggi x Baik -> Baik
+        $out['Baik'] = max($out['Baik'], min($mat['Tinggi'], $kon['Baik']));
+
+        return $out;
+    }
+
+    private function evaluatePilarDRules($q_a, $q_l, $q_d)
+    {
+        $pilarD = ['Buruk' => 0.0, 'Sedang' => 0.0, 'Baik' => 0.0];
+        $states = ['Buruk', 'Sedang', 'Baik'];
+        
+        foreach ($states as $a) {
+            foreach ($states as $l) {
+                foreach ($states as $d) {
+                    $alpha = min($q_a[$a], $q_l[$l], $q_d[$d]);
+                    if ($alpha > 0) {
+                        $burukCount = ($a === 'Buruk' ? 1 : 0) + ($l === 'Buruk' ? 1 : 0) + ($d === 'Buruk' ? 1 : 0);
+                        $baikCount = ($a === 'Baik' ? 1 : 0) + ($l === 'Baik' ? 1 : 0) + ($d === 'Baik' ? 1 : 0);
+                        
+                        if ($burukCount >= 2 || ($burukCount == 1 && $baikCount <= 1)) {
+                            $out = 'Buruk';
+                        } elseif ($baikCount >= 2) {
+                            $out = 'Baik';
+                        } else {
+                            $out = 'Sedang';
+                        }
+                        
+                        $pilarD[$out] = max($pilarD[$out], $alpha);
+                    }
+                }
+            }
+        }
+        return $pilarD;
+    }
+
+    private function defuzzifyPilarD($inferredResult)
+    {
+        $sumNumerator = 0;
+        $sumDenominator = 0;
+        
+        $sets = [
+            'Buruk' => [0.0, 0.0, 0.4],
+            'Sedang' => [0.3, 0.5, 0.7],
+            'Baik' => [0.6, 1.0, 1.0]
+        ];
+
+        for ($z = 0; $z <= 1.0; $z += 0.01) {
+            $muCombine = 0;
+            foreach ($inferredResult as $setName => $alpha) {
+                $muZ = $this->calculateMembership($z, $sets[$setName]);
+                $muRule = min($muZ, $alpha);
+                $muCombine = max($muCombine, $muRule);
+            }
+            $sumNumerator += $z * $muCombine;
+            $sumDenominator += $muCombine;
+        }
+
+        return $sumDenominator == 0 ? 0 : ($sumNumerator / $sumDenominator);
+    }
+
+    private function calculateMembership($x, $params)
+    {
+        [$a, $b, $c] = $params;
+        // Left shoulder
+        if ($a == $b && $x <= $a) return 1.0;
+        // Right shoulder
+        if ($b == $c && $x >= $c) return 1.0;
+        
+        if ($x <= $a || $x >= $c) return 0.0;
+        if ($x == $b) return 1.0;
+        if ($x > $a && $x < $b) return ($x - $a) / ($b - $a);
+        if ($x > $b && $x < $c) return ($c - $x) / ($c - $b);
+        
+        return 0.0;
     }
 
     public function runAssessment($pendudukId, $periode)

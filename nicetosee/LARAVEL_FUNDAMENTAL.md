@@ -1,38 +1,30 @@
-# 🏛️ Fundamental Laravel (Senior Architect Perspective)
+# 🏛️ Laravel Fundamental: Panduan Lengkap Project Simpelaju
 
-Memahami Laravel bukan sekadar menghafal syntax, tapi memahami alur data (Request Lifecycle).
+Selamat datang di direktori panduan (Guidebook) untuk pengembangan menggunakan Laravel pada project **Simpelaju**. 
 
-## 1. Alur Kerja (MVC Pattern)
-Laravel menggunakan pola **Model-View-Controller**:
-*   **Routes**: Gerbang masuk. Menentukan URL mana yang ditangani oleh Controller mana.
-*   **Controller**: Otak/Logika. Mengambil data dari Model dan mengirimkannya ke View.
-*   **Model (Eloquent)**: Representasi Database. Semua interaksi tabel dilakukan di sini (ORM).
-*   **View (Blade)**: Tampilan. Tempat HTML dan CSS berada.
+Berdasarkan pengecekan sistem, project ini menggunakan **Laravel Framework versi 12.x** dengan engine UI menggunakan **Blade dan TailwindCSS**.
 
-## 2. Konsep Penting
-### A. Migrations (Version Control for Database)
-Jangan pernah membuat tabel manual di phpMyAdmin. Gunakan migrasi agar skema database bisa dilacak di Git dan dijalankan oleh orang lain dengan satu perintah.
-`php artisan make:migration create_nama_tabel`
+Untuk memudahkan Anda dalam membaca dan mencari referensi, buku panduan ini telah kami **pisahkan dan susun secara terstruktur** mengikuti urutan *development* fitur Laravel yang paling direkomendasikan.
 
-### B. Eloquent ORM
-Interaksi database yang manusiawi.
-*   `Penduduk::all()` -> Ambil semua data.
-*   `Penduduk::where('nik', '123')->first()` -> Cari data spesifik.
+---
 
-### C. Blade Templating
-Laravel menggunakan `@` sebagai shortcut PHP di HTML.
-*   `{{ $variable }}` -> Cetak data (otomatis aman dari XSS).
-*   `@if(...)` / `@foreach(...)` -> Control flow.
-*   `<x-component>` -> Komponen UI yang bisa dipakai ulang (DRY).
+## 📚 Daftar Isi Guidebook Laravel:
 
-### D. Middleware
-Lapisan keamanan sebelum masuk ke Controller. Contoh: `auth` middleware memastikan hanya user yang sudah login yang bisa akses.
+Silakan klik tautan di bawah ini untuk mempelajari setiap komponen secara detail dan mendalam:
 
-### E. Service Pattern (Advanced)
-Untuk logika kompleks (seperti Fuzzy Mamdani), jangan tumpuk di Controller. Buatlah class khusus di folder `app/Services`. Ini membuat kode Anda **SOLID** dan mudah dites.
+### 🔄 1. [Alur Development Laravel yang Benar](./guidebook/01_ALUR_DEVELOPMENT.md)
+*Wajib dibaca pertama kali.* Menjelaskan siklus bagaimana semua komponen (MVC) saling terhubung dari awal hingga akhir, dan urutan pengerjaan coding yang benar saat membuat fitur baru.
 
-## 🛠️ Best Practice Tips
-1.  **KISS (Keep It Simple, Stupid)**: Jika Laravel sudah punya fiturnya, jangan buat fungsi manual.
-2.  **DRY (Don't Repeat Yourself)**: Jika Anda menulis kode yang sama dua kali, buatlah fungsi/komponen.
-3.  **Thin Controller, Fat Model/Service**: Controller harusnya hanya bertugas menerima input dan mengarahkan output. Logika berat harus ada di Service.
-4.  **Eager Loading**: Selalu gunakan `->with('relasi')` untuk menghindari query database yang terlalu banyak (N+1 Problem).
+### 💾 2. [Database & Model (Eloquent ORM)](./guidebook/02_DATABASE_DAN_MODEL.md)
+Bagaimana merancang arsitektur data (Migrations), serta bagaimana menghubungkan kode PHP dengan Database menggunakan Model dan fungsi `$fillable`.
+
+### 🛣️ 3. [Routes (Pintu Masuk Aplikasi)](./guidebook/03_ROUTES.md)
+Pelajari tentang URL, method `GET/POST`, parameter dinamis, pendaftaran *Middleware*, dan fungsi penamaan `Route::name()`.
+
+### 🧠 4. [Controller (Logika Bisnis Utama)](./guidebook/04_CONTROLLER.md)
+Pusat kendali aplikasi. Cara menangani permintaan (*Request*), memvalidasi formulir (`$request->validate()`), mengambil data, dan mengarahkan halaman (*Redirect & Flash Session*).
+
+### 🎨 5. [View, Blade & TailwindCSS](./guidebook/05_VIEW_BLADE_TAILWIND.md)
+Mengatur antarmuka pengguna (UI). Pelajari keajaiban *template engine* Blade (`@foreach`, `@if`, `{{ $var }}`) dan cara cepat mendesain layout cantik yang responsif menggunakan *utility classes* **TailwindCSS**.
+
+---

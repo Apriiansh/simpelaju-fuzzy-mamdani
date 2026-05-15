@@ -178,7 +178,7 @@
                                         <div>
                                             <x-input-label for="kondisi_atap" :value="__('Kondisi Atap')" />
                                             <select name="kondisi_atap" class="mt-1 w-full border-amber-200 rounded-xl text-sm bg-amber-50/10">
-                                                <option value="Baik" {{ old('kondisi_atap', $rumah->kondisi_atap) == 'Baik' ? 'selected' : '' }}>Baik (Tidak Bocor)</option>
+                                                <option value="Rusak Ringan" {{ old('kondisi_atap', $rumah->kondisi_atap) == 'Rusak Ringan' ? 'selected' : (old('kondisi_atap', $rumah->kondisi_atap) == 'Baik' ? 'selected' : '') }}>Rusak Ringan (Retak kecil, masih layak)</option>
                                                 <option value="Rusak Sedang / Sebagian" {{ old('kondisi_atap', $rumah->kondisi_atap) == 'Rusak Sedang / Sebagian' ? 'selected' : '' }}>Rusak Sedang</option>
                                                 <option value="Rusak Berat / Seluruhnya" {{ old('kondisi_atap', $rumah->kondisi_atap) == 'Rusak Berat / Seluruhnya' ? 'selected' : '' }}>Rusak Berat</option>
                                             </select>
@@ -186,7 +186,7 @@
                                         <div>
                                             <x-input-label for="kondisi_dinding" :value="__('Kondisi Dinding')" />
                                             <select name="kondisi_dinding" class="mt-1 w-full border-amber-200 rounded-xl text-sm bg-amber-50/10">
-                                                <option value="Baik" {{ old('kondisi_dinding', $rumah->kondisi_dinding) == 'Baik' ? 'selected' : '' }}>Baik (Kokoh)</option>
+                                                <option value="Rusak Ringan" {{ old('kondisi_dinding', $rumah->kondisi_dinding) == 'Rusak Ringan' ? 'selected' : (old('kondisi_dinding', $rumah->kondisi_dinding) == 'Baik' ? 'selected' : '') }}>Rusak Ringan (Retak kecil, masih layak)</option>
                                                 <option value="Rusak Sedang / Sebagian" {{ old('kondisi_dinding', $rumah->kondisi_dinding) == 'Rusak Sedang / Sebagian' ? 'selected' : '' }}>Rusak Sedang</option>
                                                 <option value="Rusak Berat / Seluruhnya" {{ old('kondisi_dinding', $rumah->kondisi_dinding) == 'Rusak Berat / Seluruhnya' ? 'selected' : '' }}>Rusak Berat</option>
                                             </select>
@@ -196,7 +196,7 @@
                                         <div>
                                             <x-input-label for="kondisi_lantai" :value="__('Kondisi Lantai')" />
                                             <select name="kondisi_lantai" class="mt-1 w-full border-amber-200 rounded-xl text-sm bg-amber-50/10">
-                                                <option value="Baik" {{ old('kondisi_lantai', $rumah->kondisi_lantai) == 'Baik' ? 'selected' : '' }}>Baik (Rata/Bersih)</option>
+                                                <option value="Rusak Ringan" {{ old('kondisi_lantai', $rumah->kondisi_lantai) == 'Rusak Ringan' ? 'selected' : (old('kondisi_lantai', $rumah->kondisi_lantai) == 'Baik' ? 'selected' : '') }}>Rusak Ringan (Retak kecil, masih layak)</option>
                                                 <option value="Rusak Sedang / Sebagian" {{ old('kondisi_lantai', $rumah->kondisi_lantai) == 'Rusak Sedang / Sebagian' ? 'selected' : '' }}>Rusak Sedang</option>
                                                 <option value="Rusak Berat / Seluruhnya" {{ old('kondisi_lantai', $rumah->kondisi_lantai) == 'Rusak Berat / Seluruhnya' ? 'selected' : '' }}>Rusak Berat</option>
                                             </select>

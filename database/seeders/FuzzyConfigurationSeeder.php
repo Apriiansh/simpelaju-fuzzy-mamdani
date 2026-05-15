@@ -42,7 +42,13 @@ class FuzzyConfigurationSeeder extends Seeder
                 FuzzySet::create(['kriteria_id' => $kriteria->id, 'nama' => 'Tidak Sehat', 'tipe' => 'trapesium', 'parameter' => [0, 0, 0.15, 0.35]]);
                 FuzzySet::create(['kriteria_id' => $kriteria->id, 'nama' => 'Cukup', 'tipe' => 'segitiga', 'parameter' => [0.2, 0.5, 0.8]]);
                 FuzzySet::create(['kriteria_id' => $kriteria->id, 'nama' => 'Sehat', 'tipe' => 'trapesium', 'parameter' => [0.65, 0.85, 1, 1]]);
+            } elseif ($k['kode'] === 'K4') {
+                FuzzySet::create(['kriteria_id' => $kriteria->id, 'nama' => 'Buruk', 'tipe' => 'trapesium', 'parameter' => [0, 0, 0.2, 0.4]]);
+                FuzzySet::create(['kriteria_id' => $kriteria->id, 'nama' => 'Sedang', 'tipe' => 'segitiga', 'parameter' => [0.3, 0.5, 0.7]]);
+                
+                FuzzySet::create(['kriteria_id' => $kriteria->id, 'nama' => 'Baik', 'tipe' => 'trapesium', 'parameter' => [0.6, 0.8, 1, 1]]);
             } else {
+                // K1 (Keselamatan)
                 FuzzySet::create(['kriteria_id' => $kriteria->id, 'nama' => 'Buruk', 'tipe' => 'trapesium', 'parameter' => [0, 0, 0.15, 0.35]]);
                 FuzzySet::create(['kriteria_id' => $kriteria->id, 'nama' => 'Sedang', 'tipe' => 'segitiga', 'parameter' => [0.2, 0.5, 0.8]]);
                 FuzzySet::create(['kriteria_id' => $kriteria->id, 'nama' => 'Baik', 'tipe' => 'trapesium', 'parameter' => [0.65, 0.85, 1, 1]]);

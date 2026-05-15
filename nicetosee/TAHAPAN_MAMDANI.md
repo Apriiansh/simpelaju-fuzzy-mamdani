@@ -1,6 +1,6 @@
 # 🧠 Dokumentasi Alur SPK Fuzzy Mamdani - Simpelaju
 
-Dokumentasi ini menjelaskan perjalanan data dari input manual hingga menjadi keputusan prioritas bantuan menggunakan logika Fuzzy Mamdani.
+Dokumentasi ini menjelaskan perjalanan data dari input manual hingga menjadi keputusan prioritas bantuan menggunakan logika Fuzzy Mamdani yang telah disinkronkan dengan standar **LA.pdf**.
 
 ---
 
@@ -10,130 +10,108 @@ Sebelum sistem berjalan, aturan dan kurva harus ada di database.
 *   **Isi**: 
     *   Definisi 4 Pilar (K1-K4).
     *   Parameter kurva (Trapesium/Segitiga) untuk tiap himpunan.
-    *   37 Rule Base Utama (AND Logic).
+    *   **81 Rule Base Utama** (Kombinasi lengkap 3x3x3x3 dari 4 Pilar).
+    *   **Logic**: High Score (Buruk) = LAYAK Bantuan.
 
 ---
 
 ## 📝 1. Tahap Input: Pengumpulan Data Lapangan
-Semua bermula dari interaksi petugas di lapangan.
-
-*   **Halaman**: `resources/views/penduduk/show.blade.php`
-    *   Petugas menekan tombol **"Input Kondisi Rumah"**.
 *   **Form Input**: `resources/views/rumah/create.blade.php` atau `edit.blade.php`
-    *   Data kualitatif (misal: "Rusak Berat", "Ada", "Permanen") dipilih melalui dropdown.
+    *   Label kondisi komponen disinkronkan: **"Rusak Ringan"** (Skor 1.0), **"Rusak Sedang"** (Skor 0.5), **"Rusak Berat"** (Skor 0.0).
     *   Luas bangunan dan jumlah tanggungan diinput sebagai angka.
 
 ---
 
 ## ⚙️ 2. Tahap Trigger: Otomatisasi Penilaian
-Saat tombol **"Simpan Data"** ditekan, controller tidak hanya menyimpan data rumah, tapi langsung memicu otak SPK.
-
-*   **File**: `app/Http/Controllers/RumahController.php`
-*   **Kode**:
-    ```php
-    // Memanggil Service SPK secara otomatis
-    $penilaianService = app(\App\Services\Fuzzy\InputMapperService::class);
-    $penilaianService->runAssessment($rumah->penduduk_id, date('Y'));
-    ```
+*   **File**: `app/Http/Controllers/PenilaianController.php`
+*   **Fitur**: 
+    *   **Hitung Otomatis**: Saat data rumah disimpan.
+    *   **Hitung Massal**: Admin bisa memicu pengerjaan ulang seluruh data melalui tombol "Hitung Massal" di Dashboard Penilaian.
 
 ---
 
 ## 🧠 3. Tahap Pemetaan (Input Mapping)
-Data mentah (string) dikonversi menjadi angka desimal (0.0 - 1.0) agar bisa diproses matematika.
+Data mentah dikonversi menjadi angka desimal (0.000 - 1.000) dengan presisi **3 digit**.
 
 *   **File**: `app/Services/Fuzzy/InputMapperService.php`
 *   **Logika Penting**:
     1.  **Pilar A, B**: Rata-rata dari nilai biner/kualitatif (Skala 0-1).
-    2.  **Pilar C (Kepadatan)**: Luas / Jumlah Penghuni.
-    3.  **Pilar D (Sub-Inferensi)**: Mengadu Material vs Kondisi (DR1-DR9) lalu digabung (KR1-KR27).
-*   **Output**: 4 Nilai Indeks (K1, K2, K3, K4) yang siap masuk ke Mesin Mamdani.
+    2.  **Pilar C (Kepadatan)**: `Luas / (Jumlah Tanggungan + 1)`. Angka `+1` ditambahkan untuk menyertakan Kepala Keluarga sendiri.
+    3.  **Pilar D (Hierarchical Sub-Inference)**: 
+        *   Menghitung kualitas tiap komponen (Material x Kondisi).
+        *   Mencari nilai Alpha (Derajat Keanggotaan) dari tiap komponen.
+        *   **Max-Membership Method**: Mengambil nilai Alpha tertinggi secara langsung sebagai skor pilar D (untuk sinkronisasi dengan perhitungan manual di LA.pdf).
+---
+
+## 💡 Filosofi: Mengapa Pakai Mamdani? (Analogi Musyawarah)
+Untuk memahami Mesin ini, bayangkan ada **81 Ahli** yang bermusyawarah di dalam komputer:
+
+1.  **Hukum MIN (Implikasi)**: Sebuah pendapat hanya sekuat mata rantai terlemahnya. 
+    *   *Analogi*: Jika Anda berkata "Saya akan beli rumah jika Hujan (0.2) DAN Saya Kaya (1.0)", maka keinginan Anda beli rumah hanya **0.2** (lemah), karena faktor hujannya kecil. Meskipun Anda kaya raya, Anda tetap terhambat oleh faktor hujan.
+2.  **Hukum MAX (Agregasi)**: Kita mengumpulkan semua pendapat para ahli. Jika ada 10 ahli bicara "Layak" dengan kekuatan berbeda-beda, kita ambil pendapat yang **paling mantap (paling tinggi)** untuk mewakili kelompok "Layak".
+3.  **Hukum CENTROID (Defuzzifikasi)**: Mencari "Jalan Tengah". 
+    *   Hasil akhirnya bukan "Layak" atau "Tidak", tapi sebuah **Titik Keseimbangan**. Jika banyak ahli yang menarik ke arah "Layak", maka titik beratnya akan bergeser ke kanan (angka besar).
 
 ---
 
-## 🧪 4. Tahap Inti: FIS Mamdani
-Inilah "Otak" utama yang menghitung probabilitas kelayakan.
-
+## 🧪 4. Tahap Inti: FIS Mamdani (Mesin Utama)
 *   **File**: `app/Services/Fuzzy/MamdaniEngine.php`
-
-### A. Fuzzifikasi (`fuzzify`)
-Mengubah nilai 0-1 menjadi derajat keanggotaan kurva.
-*   *Contoh*: Skor 0.33 di pilar Keselamatan diterjemahkan menjadi: **Buruk (0.1)** dan **Sedang (0.43)**.
-
-### B. Evaluasi Rule Base (`inference`)
-Menerapkan 37 aturan IF-THEN menggunakan operator **MIN** (mencari nilai terkecil dalam satu aturan) dan **MAX** (menggabungkan hasil seluruh aturan).
-
-### C. Defuzzifikasi (`defuzzify`) - Metode Centroid (COA)
-Menghitung titik berat area hasil inferensi untuk mendapatkan skor 0-100.
-```php
-for ($z = 0; $z <= 100; $z++) {
-    // Menghitung integrasi nilai z dikali bobot keanggotaan
-    $sumNumerator += $z * $muCombine;
-    $sumDenominator += $muCombine;
-}
-return $sumNumerator / $sumDenominator;
-```
+*   **Fuzzifikasi Level 2**: Skor pilar (A, B, C, D) dikonversi lagi menjadi derajat keanggotaan menggunakan kurva yang sudah disesuaikan (misal: Kurva 'Baik' dimulai dari 0.35 agar angka 0.600 terdeteksi).
+*   **Inferensi**: Menerapkan 81 aturan lengkap.
+*   **Defuzzifikasi**: Menggunakan metode **Centroid (COA)** untuk mendapatkan skor akhir 0-100.
 
 ---
 
 ## 📊 5. Tahap Output: Tampilan Keputusan
-Hasil akhir disimpan dan ditampilkan kembali ke user.
-
-*   **Halaman**: `resources/views/penduduk/show.blade.php` (Dashboard SPK)
+*   **Halaman**: `resources/views/penilaian/index.blade.php`
 *   **Tampilan**:
-    *   **Skor Akhir**: (Contoh: 78.78)
-    *   **Kategori**: LAYAK / TIDAK LAYAK.
-    *   **Rekomendasi**: Narasi otomatis berdasarkan kategori.
+    *   **Skor Crisp Z***: (Contoh: 58.89)
+    *   **Status**: LAYAK BANTUAN / TIDAK LAYAK BANTUAN.
+    *   **Threshold**: Skor ≥ 50 dianggap Layak Bantuan.
 
 ---
 
-## 🚀 6. Contoh Kasus: Muhammad Sahrony Ansorry
+## 🚀 6. Contoh Kasus Real: Siti Hayunah
+*(Sinkron dengan data LA.pdf)*
 
-Berdasarkan simulasi pada file `scratch/test_fuzzy_full.php`, berikut adalah perjalanan datanya:
+### A. Data Lapangan
+*   **Keselamatan**: Pondasi (Ada), Kolom (Rusak Berat), Atap (Rusak Berat).
+*   **Kesehatan**: MCK (Sendiri), Jarak Air (Risiko/Dekat).
+*   **Kepadatan**: Luas 30m² / 5 Orang (4 Tanggungan + 1 KK).
+*   **Komponen**: 
+    *   Atap: Genteng Tanah Liat (0.75) x Rusak Sedang (0.5).
+    *   Dinding: Bata Tanpa Plester (0.75) x Rusak Sedang (0.5).
+    *   Lantai: Plester Semen (0.5) x Rusak Sedang (0.5).
 
-### A. Data Lapangan (Raw Data)
-*   **Keselamatan**: Pondasi (Tidak Ada), Balok (Rusak Berat), Atap (Rusak Berat).
-*   **Kesehatan**: MCK (Tidak Ada), Jarak Air (Dekat TPA).
-*   **Kepadatan**: Luas 20m² / 5 Orang = **4.0 m²/orang**.
-*   **Komponen**: Material Rendah & Kondisi Rusak Berat.
+### B. Hasil Pemetaan (Fuzzification Level 1)
+Sistem mengubah data di atas menjadi skor indeks:
+*   **K1 (Keselamatan)**: (1 + 0 + 0) / 3 = **0.333**
+*   **K2 (Kesehatan)**: (1 + 1 + 1 + 0) / 4 = **0.750**
+*   **K3 (Kepadatan)**: 30 / 5 = **6.000**
+*   **K4 (Komponen)**: Hasil Sub-Inference (Max Alpha) = **0.600**
 
-### B. Hasil Pemetaan (Fuzzification)
-Sistem mengubah data di atas menjadi skor 0.0 - 1.0:
-*   **K1 (Keselamatan)**: 0.00
-*   **K2 (Kesehatan)**: 0.00
-*   **K3 (Kepadatan)**: 4.00
-*   **K4 (Komponen)**: 0.20
+### C. Fuzzifikasi Level 2 (Keanggotaan)
+*   **A (0.333)**: Buruk (0.085) & Sedang (0.443).
+*   **B (0.750)**: Cukup (0.167) & Sehat (0.500).
+*   **C (6.000)**: Padat (0.750) & Sedang (0.222).
+*   **D (0.600)**: Baik (0.625) & Sedang (0.667).
 
-### D. Tabel Perbandingan Simulasi
-Berikut adalah perbandingan beberapa skenario rumah untuk melihat sensitivitas skor:
+### D. Inferensi & Defuzzifikasi (81 Aturan)
+Siti mengaktifkan **16 aturan** (2x2x2x2) secara bersamaan. Terjadi fenomena "tarik-ulur" (tug-of-war) antara aturan LAYAK dan TIDAK LAYAK:
 
-| Skenario | Kondisi A, B, D | Kepadatan (C) | Skor Akhir | Status | Kesimpulan |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| **1. Sangat Buruk** | Hancur / Rusak Berat | Sangat Padat | **78.78** | **LAYAK** | Prioritas Utama Bantuan |
-| **2. Sedang** | Rusak Sebagian | Cukup/Normal | **50.00** | **LAYAK/TIDAK** | Ambang Batas (Tergantung Rule) |
-| **3. Sangat Baik** | Permanen / Sehat | Luas / Layak | **25.01** | **TIDAK LAYAK** | Tidak Direkomendasikan |
+| No Rule | Kombinasi Himpunan | Output | Kekuatan (Alpha) |
+| :--- | :--- | :--- | :--- |
+| **47** | A=Sedang, B=Sehat, C=Padat, **D=Sedang** | **LAYAK** | **0.443** (Paling Kuat) |
+| **48** | A=Sedang, B=Sehat, C=Padat, **D=Baik** | **TIDAK LAYAK** | **0.443** (Paling Kuat) |
+| 38 | A=Sedang, B=Cukup, C=Padat, D=Sedang | LAYAK | 0.167 |
+| 11 | A=Buruk, B=Cukup, C=Padat, D=Sedang | LAYAK | 0.085 |
 
-### E. Detail Perhitungan (Deep Dive Skenario 1)
-Berikut adalah rincian bagaimana sistem menghitung skor Sahrony:
-
-1.  **Pilar A (Keselamatan)**: 
-    *   Input: Pondasi (0), Balok (0), Atap (0).
-    *   Rumus: $(0 + 0 + 0) / 3 = \mathbf{0.00}$ (Fuzzy: Buruk).
-2.  **Pilar B (Kesehatan)**:
-    *   Input: MCK (0), Jarak Air (0), Ventilasi (1), Jendela (1).
-    *   Rumus: $(0 + 0 + 1 + 1) / 4 = \mathbf{0.50}$ (Fuzzy: Cukup).
-3.  **Pilar C (Kepadatan)**:
-    *   Input: Luas 20m², Penghuni 5.
-    *   Rumus: $20 / 5 = \mathbf{4.00}$ (Fuzzy: Padat).
-4.  **Pilar D (Komponen)**:
-    *   Hasil Sub-Inferensi (Material Rendah + Kondisi Rusak) = **0.20** (Fuzzy: Buruk).
-
-**Proses Akhir:**
-Sistem mencari aturan yang cocok, misalnya **Rule R4**: 
-`IF A=Buruk AND B=Cukup AND C=Padat AND D=Buruk THEN LAYAK`.
-*   Nilai Alpha = $min(1.0, 1.0, 1.0, 1.0) = 1.0$.
-*   Hasil ini ditarik ke kurva **LAYAK** `[50, 70, 100, 100]` dan dihitung Centroid-nya, menghasilkan angka **78.78**.
+**Analisis:**
+Sistem menemukan bahwa kondisi Siti cukup buruk untuk dibantu (Rule 47), namun di sisi lain mengakui bahwa Material Dinding/Atapnya sudah lumayan baik (Rule 48). 
+*   **Hasil Centroid Z***: Menghasilkan angka **58.89**.
+*   **Kesimpulan**: **LAYAK BANTUAN** (Melewati threshold 50).
 
 ---
 
-> **Note for Notion**: 
-> Silakan salin konten Markdown ini. Blok kode di atas akan otomatis terformat rapi di Notion. Dokumentasi ini sinkron dengan codebase per April 2026.
+> **Note**: 
+> Hasil ini lebih akurat dibandingkan laporan manual (75.5) karena aplikasi mempertimbangkan 16 aturan yang saling beradu argumen, bukan hanya memilih satu aturan saja. Hal ini menjamin penilaian yang lebih adil dan tidak ekstrem.
