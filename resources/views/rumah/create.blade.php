@@ -27,8 +27,8 @@
                         <span class="px-4 py-1 bg-slate-200 text-slate-600 text-[10px] font-black rounded-full uppercase tracking-widest">Aspek Kepadatan</span>
                     </div>
                     <div class="p-10">
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
-                            <div class="md:col-span-1">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
+                            <div>
                                 <x-input-label for="penduduk_id" :value="__('Pemilik / Penghuni')" />
                                 @if($penduduk instanceof \App\Models\Penduduk)
                                     <input type="hidden" name="penduduk_id" value="{{ $penduduk->id }}">
@@ -67,6 +67,12 @@
                                 <x-input-label for="luas_bangunan" :value="__('Luas Bangunan (m²)')" />
                                 <x-text-input id="luas_bangunan" name="luas_bangunan" type="number" step="0.01" class="mt-2 block w-full py-3 bg-white" :value="old('luas_bangunan')" required placeholder="Misal: 36.5" />
                                 <p class="mt-2 text-[10px] text-forest/40 italic">*Minimal standar PUPR: 9m²/orang.</p>
+                            </div>
+
+                            <div>
+                                <x-input-label for="nomor_sertifikat" :value="__('Nomor Sertifikat Tanah/Rumah')" />
+                                <x-text-input id="nomor_sertifikat" name="nomor_sertifikat" type="text" class="mt-2 block w-full py-3 bg-white" :value="old('nomor_sertifikat')" placeholder="Contoh: No. Sertifikat atau NOP" />
+                                <p class="mt-2 text-[10px] text-forest/40 italic">*Kosongkan jika belum memiliki sertifikat / surat tanah.</p>
                             </div>
                         </div>
                     </div>

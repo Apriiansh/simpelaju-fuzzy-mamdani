@@ -16,7 +16,7 @@ class Rumah extends Model
         'material_atap', 'kondisi_atap', // Pilar D
         'material_dinding', 'kondisi_dinding',
         'material_lantai', 'kondisi_lantai',
-        'status_kepemilikan', 'foto_rumah'
+        'status_kepemilikan', 'foto_rumah', 'nomor_sertifikat'
     ];
 
     public function penduduk()

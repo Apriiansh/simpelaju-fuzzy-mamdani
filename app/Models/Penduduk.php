@@ -11,7 +11,10 @@ class Penduduk extends Model
     protected $fillable = [
         'nik', 'nama_lengkap', 'alamat', 'kelurahan_id', 
         'no_telepon', 'status_pernikahan', 'jumlah_tanggungan', 
-        'penghasilan', 'latitude', 'longitude'
+        'penghasilan', 'rt', 'rw', 'usia', 'pendidikan_terakhir', 'jenis_kelamin',
+        'pekerjaan_utama', 'pernah_dapat_bantuan', 'jenis_kawasan',
+        'aset_rumah_lain', 'aset_tanah_lain',
+        'latitude', 'longitude'
     ];
 
     public function kelurahan()

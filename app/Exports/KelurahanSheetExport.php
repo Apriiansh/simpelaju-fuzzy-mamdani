@@ -80,15 +80,36 @@ class KelurahanSheetExport implements FromCollection, WithTitle, WithHeadings, W
         $rumah    = $penduduk->rumah;
 
         // Grouping Data Penduduk
-        $dataPenduduk = $penduduk->nik . "\n" . $penduduk->nama_lengkap;
+        $genderText = $penduduk->jenis_kelamin === 'L' ? 'Laki-laki' : ($penduduk->jenis_kelamin === 'P' ? 'Perempuan' : '-');
+        $usiaText = isset($penduduk->usia) ? $penduduk->usia . ' Th' : '-';
+        $pendidikanText = $penduduk->pendidikan_terakhir ?? '-';
         
-        // Grouping Kontak
-        $kontakAlamat = $penduduk->alamat . "\n" . ($penduduk->no_telepon ?? 'No Telp: -');
+        $dataPenduduk = $penduduk->nik . "\n" . 
+                       $penduduk->nama_lengkap . "\n" . 
+                       $genderText . " / " . $usiaText . "\n" .
+                       "Pendidikan: " . $pendidikanText;
+        
+        // Grouping Alamat
+        $rtRw = ($penduduk->rt || $penduduk->rw) ? " (RT " . ($penduduk->rt ?? '-') . " / RW " . ($penduduk->rw ?? '-') . ")" : "";
+        $kontakAlamat = $penduduk->alamat . $rtRw . "\n" . ($penduduk->no_telepon ?? 'No Telp: -');
 
         // Grouping Ekonomi
+        $jumlahPenghuni = $penduduk->jumlah_tanggungan + 1;
+        $asetLain = 'Tidak Ada';
+        if ($penduduk->aset_rumah_lain && $penduduk->aset_tanah_lain) {
+            $asetLain = 'Rumah & Tanah';
+        } elseif ($penduduk->aset_rumah_lain) {
+            $asetLain = 'Rumah';
+        } elseif ($penduduk->aset_tanah_lain) {
+            $asetLain = 'Tanah';
+        }
+
         $ekonomi = "Rp " . number_format($penduduk->penghasilan, 0, ',', '.') . " / bln\n" .
-                   $penduduk->jumlah_tanggungan . " Tanggungan\n" .
-                   "Status: " . ($penduduk->status_pernikahan ?? '-');
+                   "Kerja: " . ($penduduk->pekerjaan_utama ?? '-') . "\n" .
+                   "Penghuni: " . $jumlahPenghuni . " Jiwa (" . $penduduk->jumlah_tanggungan . " Tanggungan)\n" .
+                   "Bantuan: " . ($penduduk->pernah_dapat_bantuan ? 'Pernah Menerima' : 'Belum Pernah') . "\n" .
+                   "Kawasan: " . ($penduduk->jenis_kawasan ?? 'Normal') . "\n" .
+                   "Aset Lain: " . $asetLain;
 
         // Pilar A
         $pilarA = "Pondasi: " . ($rumah->pondasi ?? '-') . "\n" .
@@ -109,6 +130,10 @@ class KelurahanSheetExport implements FromCollection, WithTitle, WithHeadings, W
                   "Dinding: " . ($rumah->material_dinding ?? '-') . " (" . ($rumah->kondisi_dinding ?? '-') . ")\n" .
                   "Lantai: " . ($rumah->material_lantai ?? '-') . " (" . ($rumah->kondisi_lantai ?? '-');
 
+        // Status Kepemilikan & Legalitas Lahan
+        $statusKepemilikan = ($rumah->status_kepemilikan ?? '-') . "\n" .
+                             ($rumah->nomor_sertifikat ? 'Sertifikat: ' . $rumah->nomor_sertifikat : 'Belum Bersertifikat');
+
         return [
             $no,
             $dataPenduduk,
@@ -118,7 +143,7 @@ class KelurahanSheetExport implements FromCollection, WithTitle, WithHeadings, W
             $pilarB,
             $pilarC,
             $pilarD,
-            $rumah->status_kepemilikan ?? '-',
+            $statusKepemilikan,
             str_replace('_', ' ', $item->kategori_kelayakan),
             $item->rekomendasi ?? '-',
         ];
@@ -276,14 +301,25 @@ class KelurahanSheetExport implements FromCollection, WithTitle, WithHeadings, W
         $sheet->freezePane('A' . (self::DATA_HEADER_ROW + 1));
 
         // ── FILTER INFO (appended below data) ─────────────────
-        if (!empty($this->filters)) {
+        $activeFilters = [];
+        if (!empty($this->filters['kelurahan_id'])) {
+            $activeFilters[] = 'Kelurahan: ' . $this->namaKelurahan;
+        }
+        if (!empty($this->filters['status'])) {
+            $activeFilters[] = 'Status Kelayakan: ' . str_replace('_', ' ', $this->filters['status']);
+        }
+        if (!empty($this->filters['tgl_mulai'])) {
+            $activeFilters[] = 'Tanggal Mulai: ' . date('d-m-Y', strtotime($this->filters['tgl_mulai']));
+        }
+        if (!empty($this->filters['tgl_selesai'])) {
+            $activeFilters[] = 'Tanggal Akhir: ' . date('d-m-Y', strtotime($this->filters['tgl_selesai']));
+        }
+
+        if (!empty($activeFilters)) {
             $filterRow = $totalRows + 2;
             $sheet->mergeCells("A{$filterRow}:{$lastCol}{$filterRow}");
-            $filterText = 'Filter: ';
-            foreach ($this->filters as $key => $value) {
-                $filterText .= ucfirst(str_replace('_', ' ', $key)) . ': ' . $value . '   ';
-            }
-            $sheet->setCellValue("A{$filterRow}", trim($filterText));
+            $filterText = 'Filter yang digunakan -> ' . implode('  |  ', $activeFilters);
+            $sheet->setCellValue("A{$filterRow}", $filterText);
             $sheet->getStyle("A{$filterRow}")->applyFromArray([
                 'font'      => ['italic' => true, 'size' => 8, 'color' => ['rgb' => '666666']],
                 'alignment' => ['horizontal' => Alignment::HORIZONTAL_LEFT],

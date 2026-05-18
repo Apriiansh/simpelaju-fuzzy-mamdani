@@ -92,6 +92,7 @@ class RumahController extends Controller
             'kondisi_lantai' => 'required|string',
 
             'foto_rumah' => 'nullable|url',
+            'nomor_sertifikat' => 'nullable|string|max:255',
         ]);
 
         $rumah = Rumah::create($validated);
@@ -151,6 +152,7 @@ class RumahController extends Controller
             'kondisi_atap' => 'required|string',
             'kondisi_dinding' => 'required|string',
             'kondisi_lantai' => 'required|string',
+            'nomor_sertifikat' => 'nullable|string|max:255',
         ]);
 
         $rumah->update($validated);

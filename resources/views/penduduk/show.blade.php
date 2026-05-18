@@ -53,7 +53,7 @@
                     </div>
                     <div class="md:col-span-2 p-4 rounded-xl bg-paper/30 border border-premium-border/30">
                         <span class="text-[10px] font-bold text-forest/40 uppercase tracking-widest block mb-1">Alamat Tinggal</span>
-                        <p class="text-forest font-medium italic">"{{ $penduduk->alamat }}"</p>
+                        <p class="text-forest font-medium italic">"{{ $penduduk->alamat }}" @if($penduduk->rt || $penduduk->rw) (RT {{ $penduduk->rt ?? '-' }} / RW {{ $penduduk->rw ?? '-' }}) @endif</p>
                     </div>
                     <div>
                         <span class="text-[10px] font-bold text-forest/40 uppercase tracking-widest block mb-1">Kelurahan</span>
@@ -62,6 +62,14 @@
                     <div>
                         <span class="text-[10px] font-bold text-forest/40 uppercase tracking-widest block mb-1">No. Telepon</span>
                         <p class="text-forest font-bold">{{ $penduduk->no_telepon ?? '-' }}</p>
+                    </div>
+                    <div>
+                        <span class="text-[10px] font-bold text-forest/40 uppercase tracking-widest block mb-1">Jenis Kelamin / Usia</span>
+                        <p class="text-forest font-bold">{{ $penduduk->jenis_kelamin === 'L' ? 'Laki-laki (L)' : ($penduduk->jenis_kelamin === 'P' ? 'Perempuan (P)' : '-') }} / {{ $penduduk->usia ?? '-' }} Th</p>
+                    </div>
+                    <div>
+                        <span class="text-[10px] font-bold text-forest/40 uppercase tracking-widest block mb-1">Pendidikan Terakhir</span>
+                        <p class="text-forest font-bold">{{ $penduduk->pendidikan_terakhir ?? '-' }}</p>
                     </div>
                 </div>
             </div>
@@ -89,6 +97,29 @@
                     <div class="bg-forest p-5 rounded-2xl border border-forest shadow-lg shadow-forest/10">
                         <span class="text-[10px] font-bold text-cream/50 uppercase tracking-widest block mb-1">Penghasilan</span>
                         <p class="text-premium-amber font-bold text-lg font-serif">Rp {{ number_format($penduduk->penghasilan, 0, ',', '.') }}</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
+                    <div class="bg-paper/20 p-4 rounded-xl border border-premium-border/20">
+                        <span class="text-[9px] font-bold text-forest/40 uppercase tracking-widest block mb-1">Pekerjaan Utama</span>
+                        <p class="text-forest font-semibold text-sm">{{ $penduduk->pekerjaan_utama ?? '-' }}</p>
+                    </div>
+                    <div class="bg-paper/20 p-4 rounded-xl border border-premium-border/20">
+                        <span class="text-[9px] font-bold text-forest/40 uppercase tracking-widest block mb-1">Bantuan Pemerintah</span>
+                        <p class="text-forest font-semibold text-sm">{{ $penduduk->pernah_dapat_bantuan ? 'Pernah Menerima' : 'Belum Pernah' }}</p>
+                    </div>
+                    <div class="bg-paper/20 p-4 rounded-xl border border-premium-border/20">
+                        <span class="text-[9px] font-bold text-forest/40 uppercase tracking-widest block mb-1">Jenis Kawasan</span>
+                        <p class="text-forest font-semibold text-sm">{{ $penduduk->jenis_kawasan ?? 'Normal' }}</p>
+                    </div>
+                    <div class="bg-paper/20 p-4 rounded-xl border border-premium-border/20 col-span-1">
+                        <span class="text-[9px] font-bold text-forest/40 uppercase tracking-widest block mb-1">Aset Rumah Lain</span>
+                        <p class="text-forest font-semibold text-sm">{{ $penduduk->aset_rumah_lain ? 'Ada' : 'Tidak Ada' }}</p>
+                    </div>
+                    <div class="bg-paper/20 p-4 rounded-xl border border-premium-border/20 col-span-1">
+                        <span class="text-[9px] font-bold text-forest/40 uppercase tracking-widest block mb-1">Aset Tanah Lain</span>
+                        <p class="text-forest font-semibold text-sm">{{ $penduduk->aset_tanah_lain ? 'Ada' : 'Tidak Ada' }}</p>
                     </div>
                 </div>
 
@@ -179,6 +210,17 @@
                                     <div class="flex justify-between text-[10px]">
                                         <span class="text-slate-400">Lantai:</span>
                                         <span class="font-bold text-forest">{{ $penduduk->rumah->material_lantai }}</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Legalitas Lahan -->
+                            <div class="p-4 rounded-2xl border border-premium-border/50 bg-white md:col-span-2">
+                                <span class="text-[9px] font-black text-forest/40 block mb-2 uppercase tracking-widest">Legalitas Lahan</span>
+                                <div class="space-y-1">
+                                    <div class="flex justify-between text-[10px]">
+                                        <span class="text-slate-400">Nomor Sertifikat Tanah/Rumah:</span>
+                                        <span class="font-bold text-forest font-mono">{{ $penduduk->rumah->nomor_sertifikat ?? 'Belum Ada Sertifikat / Surat Tanah' }}</span>
                                     </div>
                                 </div>
                             </div>

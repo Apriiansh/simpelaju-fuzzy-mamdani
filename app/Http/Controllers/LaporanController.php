@@ -12,15 +12,33 @@ class LaporanController extends Controller
 {
     public function index(Request $request)
     {
-        $kelurahans = Kelurahan::all();
+        $user = auth()->user();
+        
+        // Operator Lurah should only see their Kelurahan
+        if ($user->role === 'operator') {
+            $kelurahans = Kelurahan::where('id', $user->kelurahan_id)->get();
+        } else {
+            $kelurahans = Kelurahan::all();
+        }
 
         $query = HasilSpk::with(['penilaian.penduduk.kelurahan', 'penilaian.penduduk.rumah'])
             ->join('penilaian', 'hasil_spk.penilaian_id', '=', 'penilaian.id')
             ->join('penduduk', 'penilaian.penduduk_id', '=', 'penduduk.id')
-            ->select('hasil_spk.*', 'penduduk.nama_lengkap', 'penduduk.nik', 'penilaian.verifikasi_status')
-            ->where('penilaian.verifikasi_status', 'valid'); // Hanya yang sudah disahkan Camat
+            ->select('hasil_spk.*', 'penduduk.nama_lengkap', 'penduduk.nik', 'penilaian.verifikasi_status');
 
-        if ($request->filled('kelurahan_id')) {
+        // Scoping based on user role
+        if ($user->role === 'admin') {
+            // Admin can see verified or valid
+            $query->whereIn('penilaian.verifikasi_status', ['terverifikasi', 'valid']);
+        } else {
+            // Camat / Operator only see validated (valid)
+            $query->where('penilaian.verifikasi_status', 'valid');
+        }
+
+        // Restrict Operator to their own Kelurahan
+        if ($user->role === 'operator') {
+            $query->where('penduduk.kelurahan_id', $user->kelurahan_id);
+        } elseif ($request->filled('kelurahan_id')) {
             $query->where('penduduk.kelurahan_id', $request->kelurahan_id);
         }
 
@@ -45,6 +63,8 @@ class LaporanController extends Controller
 
     public function cetak(Request $request)
     {
+        $user = auth()->user();
+
         // Delegate all query logic to LaporanExport
         $filters = array_filter([
             'kelurahan_id' => $request->kelurahan_id,
@@ -52,6 +72,9 @@ class LaporanController extends Controller
             'tgl_mulai'    => $request->tgl_mulai,
             'tgl_selesai'  => $request->tgl_selesai,
         ]);
+
+        $filters['user_role'] = $user->role;
+        $filters['user_kelurahan_id'] = $user->kelurahan_id;
 
         $fileName = 'Laporan_Prioritas_RTLH_' . now()->format('Ymd_His') . '.xlsx';
 

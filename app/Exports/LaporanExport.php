@@ -18,15 +18,28 @@ class LaporanExport implements WithMultipleSheets
 
     public function sheets(): array
     {
-        // Build base query — always only VALID records
+        $role = $this->filters['user_role'] ?? 'camat';
+        $userKelurahanId = $this->filters['user_kelurahan_id'] ?? null;
+
         $query = HasilSpk::with([
             'penilaian.penduduk.kelurahan',
             'penilaian.penduduk.rumah',
         ])
             ->join('penilaian', 'hasil_spk.penilaian_id', '=', 'penilaian.id')
             ->join('penduduk', 'penilaian.penduduk_id', '=', 'penduduk.id')
-            ->select('hasil_spk.*', 'penduduk.kelurahan_id')
-            ->where('penilaian.verifikasi_status', 'valid');
+            ->select('hasil_spk.*', 'penduduk.kelurahan_id');
+
+        // Scoping based on user role
+        if ($role === 'admin') {
+            $query->whereIn('penilaian.verifikasi_status', ['terverifikasi', 'valid']);
+        } else {
+            $query->where('penilaian.verifikasi_status', 'valid');
+        }
+
+        // Restrict operator
+        if ($role === 'operator' && $userKelurahanId) {
+            $query->where('penduduk.kelurahan_id', $userKelurahanId);
+        }
 
         // Apply optional filters
         if (!empty($this->filters['kelurahan_id'])) {

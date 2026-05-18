@@ -130,11 +130,14 @@
                             <td class="px-6 py-4">
                                 <span class="text-xs font-bold text-forest/70">{{ $item->penilaian->penduduk->kelurahan->nama ?? '-' }}</span>
                             </td>
-                            <td class="px-6 py-4">
-                                <div class="flex items-center gap-2 mb-1">
+                             <td class="px-6 py-4">
+                                <div class="flex items-center gap-2 mb-1 flex-wrap">
                                     <span class="w-2 h-2 rounded-full {{ $isLayak ? 'bg-emerald-500' : 'bg-red-500' }}"></span>
                                     <span class="text-[10px] font-black uppercase tracking-widest {{ $isLayak ? 'text-emerald-700' : 'text-red-700' }}">
                                         {{ str_replace('_', ' ', $item->kategori_kelayakan) }}
+                                    </span>
+                                    <span class="px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-wider {{ $item->penilaian->verifikasi_status === 'valid' ? 'bg-forest/10 text-forest' : 'bg-blue-100 text-blue-800' }}">
+                                        {{ $item->penilaian->verifikasi_status }}
                                     </span>
                                 </div>
                                 <p class="text-[10px] text-forest/50 italic">{{ Str::limit($item->rekomendasi, 40) }}</p>
@@ -149,8 +152,13 @@
                         <tr>
                             <td colspan="5" class="px-6 py-12 text-center text-forest/40">
                                 <svg class="w-12 h-12 mx-auto mb-3 opacity-20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path></svg>
-                                <p class="text-sm font-bold uppercase tracking-widest mb-1">Belum ada data penilaian yang valid</p>
-                                <p class="text-[10px] uppercase tracking-[0.2em] opacity-60">Pastikan Camat telah melakukan validasi pada menu penilaian</p>
+                                @if(auth()->user()->role === 'admin')
+                                    <p class="text-sm font-bold uppercase tracking-widest mb-1">Belum ada data penilaian yang terverifikasi</p>
+                                    <p class="text-[10px] uppercase tracking-[0.2em] opacity-60">Pastikan data usulan telah diverifikasi pada menu penilaian</p>
+                                @else
+                                    <p class="text-sm font-bold uppercase tracking-widest mb-1">Belum ada data penilaian yang valid</p>
+                                    <p class="text-[10px] uppercase tracking-[0.2em] opacity-60">Pastikan Camat telah melakukan validasi pada menu penilaian</p>
+                                @endif
                             </td>
                         </tr>
                         @endforelse

@@ -78,6 +78,16 @@ class PendudukController extends Controller
             'penghasilan' => 'required|numeric|min:0',
             'latitude' => 'nullable|numeric',
             'longitude' => 'nullable|numeric',
+            'rt' => 'nullable|string|max:10',
+            'rw' => 'nullable|string|max:10',
+            'usia' => 'nullable|integer|min:0|max:150',
+            'pendidikan_terakhir' => 'nullable|string|max:50',
+            'jenis_kelamin' => 'nullable|string|size:1|in:L,P',
+            'pekerjaan_utama' => 'nullable|string|max:100',
+            'pernah_dapat_bantuan' => 'nullable|boolean',
+            'jenis_kawasan' => 'nullable|string|max:100',
+            'aset_rumah_lain' => 'nullable|boolean',
+            'aset_tanah_lain' => 'nullable|boolean',
         ];
 
         if ($user->role !== 'operator') {
@@ -85,6 +95,10 @@ class PendudukController extends Controller
         }
 
         $validated = $request->validate($rules);
+
+        $validated['pernah_dapat_bantuan'] = $request->boolean('pernah_dapat_bantuan');
+        $validated['aset_rumah_lain'] = $request->boolean('aset_rumah_lain');
+        $validated['aset_tanah_lain'] = $request->boolean('aset_tanah_lain');
 
         if ($user->role === 'operator') {
             $validated['kelurahan_id'] = $user->kelurahan_id;
@@ -140,7 +154,21 @@ class PendudukController extends Controller
             'penghasilan' => 'required|numeric|min:0',
             'latitude' => 'nullable|numeric',
             'longitude' => 'nullable|numeric',
+            'rt' => 'nullable|string|max:10',
+            'rw' => 'nullable|string|max:10',
+            'usia' => 'nullable|integer|min:0|max:150',
+            'pendidikan_terakhir' => 'nullable|string|max:50',
+            'jenis_kelamin' => 'nullable|string|size:1|in:L,P',
+            'pekerjaan_utama' => 'nullable|string|max:100',
+            'pernah_dapat_bantuan' => 'nullable|boolean',
+            'jenis_kawasan' => 'nullable|string|max:100',
+            'aset_rumah_lain' => 'nullable|boolean',
+            'aset_tanah_lain' => 'nullable|boolean',
         ]);
+
+        $validated['pernah_dapat_bantuan'] = $request->boolean('pernah_dapat_bantuan');
+        $validated['aset_rumah_lain'] = $request->boolean('aset_rumah_lain');
+        $validated['aset_tanah_lain'] = $request->boolean('aset_tanah_lain');
 
         $penduduk->update($validated);
 

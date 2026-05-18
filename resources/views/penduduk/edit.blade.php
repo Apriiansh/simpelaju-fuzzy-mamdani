@@ -38,8 +38,20 @@
 
                     <div class="md:col-span-2">
                         <x-input-label for="alamat" :value="__('Alamat Lengkap')" />
-                        <textarea id="alamat" name="alamat" rows="3" class="mt-1 block w-full border-premium-border/40 bg-white/50 focus:border-forest focus:ring-forest rounded-xl shadow-sm transition-all duration-300" required>{{ old('alamat', $penduduk->alamat) }}</textarea>
+                        <textarea id="alamat" name="alamat" rows="2" class="mt-1 block w-full border-premium-border/40 bg-white/50 focus:border-forest focus:ring-forest rounded-xl shadow-sm transition-all duration-300" required>{{ old('alamat', $penduduk->alamat) }}</textarea>
                         <x-input-error class="mt-2" :messages="$errors->get('alamat')" />
+                    </div>
+
+                    <div>
+                        <x-input-label for="rt" :value="__('RT')" />
+                        <x-text-input id="rt" name="rt" type="text" class="mt-1 block w-full" :value="old('rt', $penduduk->rt)" placeholder="Contoh: 10" />
+                        <x-input-error class="mt-2" :messages="$errors->get('rt')" />
+                    </div>
+
+                    <div>
+                        <x-input-label for="rw" :value="__('RW')" />
+                        <x-text-input id="rw" name="rw" type="text" class="mt-1 block w-full" :value="old('rw', $penduduk->rw)" placeholder="Contoh: 04" />
+                        <x-input-error class="mt-2" :messages="$errors->get('rw')" />
                     </div>
 
                     <div>
@@ -56,6 +68,33 @@
                         <x-input-label for="no_telepon" :value="__('No. Telepon')" />
                         <x-text-input id="no_telepon" name="no_telepon" type="text" class="mt-1 block w-full" :value="old('no_telepon', $penduduk->no_telepon)" />
                         <x-input-error class="mt-2" :messages="$errors->get('no_telepon')" />
+                    </div>
+
+                    <div>
+                        <x-input-label for="usia" :value="__('Usia (Tahun)')" />
+                        <x-text-input id="usia" name="usia" type="number" class="mt-1 block w-full" :value="old('usia', $penduduk->usia)" placeholder="Contoh: 45" min="0" />
+                        <x-input-error class="mt-2" :messages="$errors->get('usia')" />
+                    </div>
+
+                    <div>
+                        <x-input-label for="jenis_kelamin" :value="__('Jenis Kelamin')" />
+                        <select id="jenis_kelamin" name="jenis_kelamin" class="mt-1 block w-full border-premium-border/40 bg-white/50 focus:border-forest focus:ring-forest rounded-xl shadow-sm transition-all duration-300 text-sm font-medium text-forest">
+                            <option value="L" {{ old('jenis_kelamin', $penduduk->jenis_kelamin) == 'L' ? 'selected' : '' }}>Laki-laki (L)</option>
+                            <option value="P" {{ old('jenis_kelamin', $penduduk->jenis_kelamin) == 'P' ? 'selected' : '' }}>Perempuan (P)</option>
+                        </select>
+                        <x-input-error class="mt-2" :messages="$errors->get('jenis_kelamin')" />
+                    </div>
+
+                    <div class="md:col-span-2">
+                        <x-input-label for="pendidikan_terakhir" :value="__('Pendidikan Terakhir')" />
+                        <select id="pendidikan_terakhir" name="pendidikan_terakhir" class="mt-1 block w-full border-premium-border/40 bg-white/50 focus:border-forest focus:ring-forest rounded-xl shadow-sm transition-all duration-300 text-sm font-medium text-forest">
+                            <option value="Tidak Punya Ijazah" {{ old('pendidikan_terakhir', $penduduk->pendidikan_terakhir) == 'Tidak Punya Ijazah' ? 'selected' : '' }}>Tidak Punya Ijazah</option>
+                            <option value="SD" {{ old('pendidikan_terakhir', $penduduk->pendidikan_terakhir) == 'SD' ? 'selected' : '' }}>SD</option>
+                            <option value="SMP" {{ old('pendidikan_terakhir', $penduduk->pendidikan_terakhir) == 'SMP' ? 'selected' : '' }}>SMP</option>
+                            <option value="SMA" {{ old('pendidikan_terakhir', $penduduk->pendidikan_terakhir) == 'SMA' ? 'selected' : '' }}>SMA</option>
+                            <option value="D4/S1" {{ old('pendidikan_terakhir', $penduduk->pendidikan_terakhir) == 'D4/S1' ? 'selected' : '' }}>D4/S1</option>
+                        </select>
+                        <x-input-error class="mt-2" :messages="$errors->get('pendidikan_terakhir')" />
                     </div>
                 </div>
             </div>
@@ -93,6 +132,49 @@
                         <x-text-input id="penghasilan" name="penghasilan" type="number" class="mt-1 block w-full font-bold text-forest" :value="old('penghasilan', (int)$penduduk->penghasilan)" required />
                         <p class="mt-1 text-[10px] text-forest/40 uppercase font-bold tracking-widest">Gunakan angka saja tanpa titik/koma</p>
                         <x-input-error class="mt-2" :messages="$errors->get('penghasilan')" />
+                    </div>
+
+                    <div>
+                        <x-input-label for="pekerjaan_utama" :value="__('Pekerjaan Utama')" />
+                        <x-text-input id="pekerjaan_utama" name="pekerjaan_utama" type="text" class="mt-1 block w-full" :value="old('pekerjaan_utama', $penduduk->pekerjaan_utama)" placeholder="Contoh: Buruh Harian, Wirausaha" />
+                        <x-input-error class="mt-2" :messages="$errors->get('pekerjaan_utama')" />
+                    </div>
+
+                    <div>
+                        <x-input-label for="pernah_dapat_bantuan" :value="__('Pernah Dapat Bantuan Pemerintah')" />
+                        <select id="pernah_dapat_bantuan" name="pernah_dapat_bantuan" class="mt-1 block w-full border-premium-border/40 bg-white/50 focus:border-forest focus:ring-forest rounded-xl shadow-sm transition-all duration-300 text-sm font-medium text-forest">
+                            <option value="0" {{ old('pernah_dapat_bantuan', $penduduk->pernah_dapat_bantuan) == '0' ? 'selected' : '' }}>Belum Pernah</option>
+                            <option value="1" {{ old('pernah_dapat_bantuan', $penduduk->pernah_dapat_bantuan) == '1' ? 'selected' : '' }}>Pernah</option>
+                        </select>
+                        <x-input-error class="mt-2" :messages="$errors->get('pernah_dapat_bantuan')" />
+                    </div>
+
+                    <div>
+                        <x-input-label for="jenis_kawasan" :value="__('Jenis Kawasan')" />
+                        <select id="jenis_kawasan" name="jenis_kawasan" class="mt-1 block w-full border-premium-border/40 bg-white/50 focus:border-forest focus:ring-forest rounded-xl shadow-sm transition-all duration-300 text-sm font-medium text-forest">
+                            <option value="Normal" {{ old('jenis_kawasan', $penduduk->jenis_kawasan) == 'Normal' ? 'selected' : '' }}>Normal</option>
+                            <option value="Kumuh" {{ old('jenis_kawasan', $penduduk->jenis_kawasan) == 'Kumuh' ? 'selected' : '' }}>Kumuh</option>
+                            <option value="Rawan Air" {{ old('jenis_kawasan', $penduduk->jenis_kawasan) == 'Rawan Air' ? 'selected' : '' }}>Rawan Air</option>
+                        </select>
+                        <x-input-error class="mt-2" :messages="$errors->get('jenis_kawasan')" />
+                    </div>
+
+                    <div>
+                        <x-input-label for="aset_rumah_lain" :value="__('Aset Rumah di Tempat Lain')" />
+                        <select id="aset_rumah_lain" name="aset_rumah_lain" class="mt-1 block w-full border-premium-border/40 bg-white/50 focus:border-forest focus:ring-forest rounded-xl shadow-sm transition-all duration-300 text-sm font-medium text-forest">
+                            <option value="0" {{ old('aset_rumah_lain', $penduduk->aset_rumah_lain) == '0' ? 'selected' : '' }}>Tidak Ada</option>
+                            <option value="1" {{ old('aset_rumah_lain', $penduduk->aset_rumah_lain) == '1' ? 'selected' : '' }}>Ada</option>
+                        </select>
+                        <x-input-error class="mt-2" :messages="$errors->get('aset_rumah_lain')" />
+                    </div>
+
+                    <div>
+                        <x-input-label for="aset_tanah_lain" :value="__('Aset Tanah di Tempat Lain')" />
+                        <select id="aset_tanah_lain" name="aset_tanah_lain" class="mt-1 block w-full border-premium-border/40 bg-white/50 focus:border-forest focus:ring-forest rounded-xl shadow-sm transition-all duration-300 text-sm font-medium text-forest">
+                            <option value="0" {{ old('aset_tanah_lain', $penduduk->aset_tanah_lain) == '0' ? 'selected' : '' }}>Tidak Ada</option>
+                            <option value="1" {{ old('aset_tanah_lain', $penduduk->aset_tanah_lain) == '1' ? 'selected' : '' }}>Ada</option>
+                        </select>
+                        <x-input-error class="mt-2" :messages="$errors->get('aset_tanah_lain')" />
                     </div>
                 </div>
             </div>
